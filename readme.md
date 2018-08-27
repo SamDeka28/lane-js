@@ -109,9 +109,10 @@ A basic example of a route handler is shown below:
     module.exports = { indexhandler: handler }
 </code>
 
-The handler takes in three params : (request, response, body | payload | query)
-1. `request` - Server request object.The querystring object and the payload are exposed through request.query and request.payload
-2. `response` - Server response object. 
+The handler takes in three params : (error, request, response)
+1. `error` - Any error encountered by the route
+2. `request` - Server request object.The querystring object and the payload are exposed through request.query and request.payload
+3. `response` - Server response object. 
 
 Redirection in Lane
 ===================
