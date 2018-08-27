@@ -1,20 +1,20 @@
-Lace.Js - A REST API solution for node
-======================================
-Lace.Js is a light weight routing solution for creating REST API's.
+LaneJs - A REST API solution for node
+====================================
+LaneJs is a light weight routing solution for creating REST API's.
 It's design is inspired by node's popular framework -ExpressJs, and the routing
 is Django inspired. It has a simplified and a small core that handles all the routing.
 This framework doesn't bend you to the rules. Using the node's core API is recommended.
 In today's world, nodeJs has been evolving ever since it's inception. Though due to the
 heavy dependency of the developer upon frameworks, use of nodeJs strong core API is somewhere
-lost. We, at Lace, welcomes you to use the Node's core API, although you do not have to write
-you routing solution yourself. The main objective of Lace is to provide you the routing solution
+lost. We, at Lane, welcomes you to use the Node's core API, although you do not have to write
+you routing solution yourself. The main objective of Lane is to provide you the routing solution
 you need. 
 
-LaceJs, itself is developed using only the Node's core API.
+LaneJs, itself is developed using only the Node's core API.
 
-How to use Lace 
+How to use Lane 
 ================
-Lace routing is inspired by the python's DJANGO framework. Therefore, we define the routes in the
+Lane routing is inspired by the python's DJANGO framework. Therefore, we define the routes in the
 urlConfig.
 
 A Basic example of the url config
@@ -34,9 +34,9 @@ A Basic example of the url config
 The urlConfig is an Object that contain "paths" child, where we can define the routes. The urlConfig resides
 in the app root inside the urlConfig directory.
 
-Creating the Lace Server
+Creating the Lane Server
 ========================
-The lace server can be created just in a snap by using a simple code snippet and configuration
+The Lane server can be created just in a snap by using a simple code snippet and configuration
 
 <code>
     const config = require("./configs/config.json");
@@ -53,7 +53,7 @@ The configs
 ===============
 The configs directory consists of the mandatory file.
 
-1. `config.json`: config.json is a requied file for LaceJs which resides in the application root inside the configs directory. The snippet below shows the required keys for the config.json file
+1. `config.json`: config.json is a requied file for LaneJs which resides in the application root inside the configs directory. The snippet below shows the required keys for the config.json file
 <code>
     {
         "template_directory": "views",
@@ -62,18 +62,18 @@ The configs directory consists of the mandatory file.
         "template_engine" : "ejs" /* required only if you are using ejs */
     }
 </code>
-the ejs template engine is just a side support in Lace because LaceJs's main objective is to provide routing for REST API's
+the ejs template engine is just a side support in Lane because LaneJs's main objective is to provide routing for REST API's
 
-2. `paths.map.json` :  the paths.map.json is a required file in LaceJs. This file contains a JSON containing only a single key 'paths' of type array. This file is used by Lace to keep track of the routes that has been created. the file automatically get rewritten when calling the "/generatePathMap" is called from the url. Once you create a route and define it in the urlConfig, hit the /generatePathMap so that the newly created route is now usable. 
+2. `paths.map.json` :  the paths.map.json is a required file in LaneJs. This file contains a JSON containing only a single key 'paths' of type array. This file is used by Lane to keep track of the routes that has been created. the file automatically get rewritten when calling the "/generatePathMap" is called from the url. Once you create a route and define it in the urlConfig, hit the /generatePathMap so that the newly created route is now usable. 
 
 
 
-Router in Lace
+Router in Lane
 ===============
-Creating Routes in Lace is pretty simple, It somewhere resembles the Express kind of routing.
-To create a Route in Lace, import the router module as :
+Creating Routes in Lane is pretty simple, It somewhere resembles the Express kind of routing.
+To create a Route in Lane, import the router module as :
 
-var { route } = require("lace-js/use/router")
+var { route } = require("lane-js/use/router")
 
 Now, you can create the route by using the "route" object as : 
 
@@ -89,20 +89,20 @@ Now, you can create the route by using the "route" object as :
 As you can see, the route is of type GET http method. It takes in a path as a string or an 
 array of path string.. In the above example ['/', '/index'] will route you to the same route handler.
 
-Breaking the route syntax in Lace
+Breaking the route syntax in Lane
 =================================
-The syntax for route in Lace is :
+The syntax for route in Lane is :
 
 routeObject.<httpVerb>(path : String | Array, { request : requestObject , response : response object} , routehandler)
 
 Creating the route handler
 ==========================
-The route handler in Lace is pretty simple as it uses the Node's native API. 
+The route handler in Lane is pretty simple as it uses the Node's native API. 
 A basic example of a route handler is shown below:
 
 <code>
-    var handler = async (req, res, body) => {
-        var renderable = "Welcome to you first Lace application";
+    var handler = async (err, req, res) => {
+        var renderable = "Welcome to you first Lane application";
         res.write(renderable);
         res.end();
     }
@@ -110,12 +110,10 @@ A basic example of a route handler is shown below:
 </code>
 
 The handler takes in three params : (request, response, body | payload | query)
-1. `request` - Server request object
-2. `response` - Server response object
-3. `body | payload | query` -  Exposes the body, payload or the query params throught the get key. If you
-are using the route.all method, the querystring object is exposes using `body.query` and the payload using `body.get`
+1. `request` - Server request object.The querystring object and the payload are exposed through request.query and request.payload
+2. `response` - Server response object. 
 
-Redirection in Lace
+Redirection in Lane
 ===================
 To redirect a to another path from a handler, we fist need to import the redirect object from the router module as :
 var { redirect } = require("lane-js/use/router")
@@ -123,7 +121,7 @@ var { redirect } = require("lane-js/use/router")
 The syntax for redirection is fairly simple
 redirect(pathname : String, res : ServerResponse)
 
-Render a Html in Lace : 
+Render a Html in Lane : 
 ======================
 var { render } = require("lane-js/use/router")
 
@@ -207,16 +205,16 @@ let content = await render({ "templateName": "index.ejs", "template_engine": "ej
                     <form method="POST" action="/create">
                         <div class="row">
                             <div class="col-md-2">
-                                <input type="text" name="name" placeholder="name" class="form-control">
+                                <input type="text" name="name" pLaneholder="name" class="form-control">
                             </div>
                             <div class="col-md-2">
-                                <input type="text" name="username" placeholder="username" class="form-control">
+                                <input type="text" name="username" pLaneholder="username" class="form-control">
                             </div>
                             <div class="col-md-2">
-                                <input type="text" name="email" placeholder="email" class="form-control">
+                                <input type="text" name="email" pLaneholder="email" class="form-control">
                             </div>
                             <div class="col-md-2">
-                                <input type="text" name="password" placeholder="password" class="form-control">
+                                <input type="text" name="password" pLaneholder="password" class="form-control">
                             </div>
                             <div class="col-md-2">
                                 <input type="submit" value="add" class="btn btn-primary">
