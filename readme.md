@@ -21,6 +21,7 @@ A Basic example of the url config
 =================================
 
 <code>
+    
     let { index, home, create, del } = require("../lanes/index")
 
     var urlConfig = {
@@ -39,7 +40,7 @@ Creating the Lane Server
 The Lane server can be created just in a snap by using a simple code snippet and configuration
 
 <code>
-    
+
     const config = require("./configs/config.json");
     const Scratch = require("lane-js");
     config.app_root = __dirname; /* required */
@@ -56,7 +57,7 @@ The configs directory consists of the mandatory file.
 1. `config.json`: config.json is a requied file for LaneJs which resides in the application root inside the configs directory. The snippet below shows the required keys for the config.json file
 
 <code>
-    
+
     "template_directory": "views",
     "app_root" : "",
     "template_static" : "views/static",
@@ -103,7 +104,7 @@ The route handler in Lane is pretty simple as it uses the Node's native API.
 A basic example of a route handler is shown below:
 
 <code>
-    
+
     var handler = async (err, req, res) => {
         var renderable = "Welcome to you first Lane application";
         res.write(renderable);
@@ -134,7 +135,7 @@ The render object of LaneJs provides two kind of rendering:
 Inbuilt String interpolated Redering and EJs rendering
 To use the Inbult String interpolated Redering capabilty for simple render:
 <code>
-    
+
     let content = {
             'page-title':"trajectory.io",
             'page-content':"welcome to the first trajectory application",
