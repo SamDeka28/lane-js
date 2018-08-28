@@ -1,4 +1,4 @@
-LaneJs - A REST API solution for node
+***LaneJs - A REST API solution for node***
 ====================================
 LaneJs is a light weight routing solution for creating REST API's.
 It's design is inspired by node's popular framework -ExpressJs, and the routing
@@ -39,9 +39,9 @@ Creating the Lane Server
 The Lane server can be created just in a snap by using a simple code snippet and configuration
 
 <code>
+    
     const config = require("./configs/config.json");
     const Scratch = require("lane-js");
-
     config.app_root = __dirname; /* required */
     
     const app = Scratch();
@@ -54,13 +54,14 @@ The configs
 The configs directory consists of the mandatory file.
 
 1. `config.json`: config.json is a requied file for LaneJs which resides in the application root inside the configs directory. The snippet below shows the required keys for the config.json file
+
 <code>
-    {
-        "template_directory": "views",
-        "app_root" : "",
-        "template_static" : "views/static",
-        "template_engine" : "ejs" /* required only if you are using ejs */
-    }
+    
+    "template_directory": "views",
+    "app_root" : "",
+    "template_static" : "views/static",
+    "template_engine" : "ejs" // required only if you are using ejs
+
 </code>
 the ejs template engine is just a side support in Lane because LaneJs's main objective is to provide routing for REST API's
 
@@ -78,6 +79,7 @@ var { route } = require("lane-js/use/router")
 Now, you can create the route by using the "route" object as : 
 
 <code>
+    
     var { route } = require("lane-js/use/router")
     var { indexhandler } = require("../models/index")
 
@@ -93,7 +95,7 @@ Breaking the route syntax in Lane
 =================================
 The syntax for route in Lane is :
 
-routeObject.<httpVerb>(path : String | Array, { request : requestObject , response : response object} , routehandler)
+routeObject.httpVerb(path : String | Array, { request : requestObject , response : response object} , routehandler)
 
 Creating the route handler
 ==========================
@@ -101,12 +103,14 @@ The route handler in Lane is pretty simple as it uses the Node's native API.
 A basic example of a route handler is shown below:
 
 <code>
+    
     var handler = async (err, req, res) => {
         var renderable = "Welcome to you first Lane application";
         res.write(renderable);
         res.end();
     }
     module.exports = { indexhandler: handler }
+
 </code>
 
 The handler takes in three params : (error, request, response)
@@ -126,10 +130,11 @@ Render a Html in Lane :
 ======================
 var { render } = require("lane-js/use/router")
 
-The render object of LaneJs provide two kind of rendering:
+The render object of LaneJs provides two kind of rendering:
 Inbuilt String interpolated Redering and EJs rendering
 To use the Inbult String interpolated Redering capabilty for simple render:
 <code>
+    
     let content = {
             'page-title':"trajectory.io",
             'page-content':"welcome to the first trajectory application",
@@ -137,10 +142,12 @@ To use the Inbult String interpolated Redering capabilty for simple render:
         }
 
     var renderable = await render({ "templateName": "index.html", replacable : content });
+
 </code>
 
 And in the html :
 <snippet>
+    
     <!DOCTYPE html>
     <html lang="en">
     <head>
@@ -174,17 +181,21 @@ And in the html :
         </div>
     </body>
     </html>
+    
 </snippet>
 
 
 If you are using the ejs engine, you need to sepecify template_engine : "ejs" in the object passed to the render method:
 
 <code>
-let user = await User.find(); /* fetching the data from the database */
-let content = await render({ "templateName": "index.ejs", "template_engine": "ejs", "data": { "data": user }, res: res })
+    
+    let user = await User.find(); /* fetching the data from the database */
+    let content = await render({ "templateName": "index.ejs", "template_engine": "ejs", "data": { "data": user }, res: res })
+
 </code>
 
 <snippet>
+    
     <!DOCTYPE html>
     <html lang="en">
 
