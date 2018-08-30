@@ -1,5 +1,7 @@
 ***LaneJs - A REST API solution for node***
 ====================================
+[![npm version](https://badge.fury.io/js/lane-js.svg)](https://badge.fury.io/js/lane-js)
+
 LaneJs is a light weight routing solution for creating REST API's.
 It's design is inspired by node's popular framework -ExpressJs, and the routing
 is Django inspired. It has a simplified and a small core that handles all the routing.
@@ -75,7 +77,7 @@ Router in Lane
 Creating Routes in Lane is pretty simple, It somewhere resembles the Express kind of routing.
 To create a Route in Lane, import the router module as :
 
-var { route } = require("lane-js/use/router")
+`var { route } = require("lane-js/use/router")`
 
 Now, you can create the route by using the "route" object as : 
 
@@ -96,7 +98,7 @@ Breaking the route syntax in Lane
 =================================
 The syntax for route in Lane is :
 
-routeObject.httpVerb(path : String | Array, { request : requestObject , response : response object} , routehandler)
+`routeObject.httpVerb(path : String | Array, { request : requestObject , response : response object} , routehandler)`
 
 Creating the route handler
 ==========================
@@ -122,14 +124,18 @@ The handler takes in three params : (error, request, response)
 Redirection in Lane
 ===================
 To redirect a to another path from a handler, we fist need to import the redirect object from the router module as :
-var { redirect } = require("lane-js/use/router")
+
+`var { redirect } = require("lane-js/use/router")`
 
 The syntax for redirection is fairly simple
-redirect(pathname : String, res : ServerResponse)
+
+`redirect(pathname : String, res : ServerResponse)`
 
 Render a Html in Lane : 
 ======================
-var { render } = require("lane-js/use/router")
+Import
+
+`var { render } = require("lane-js/use/router")`
 
 The render object of LaneJs provides two kind of rendering:
 Inbuilt String interpolated Redering and EJs rendering
