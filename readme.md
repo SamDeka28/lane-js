@@ -1,8 +1,8 @@
 
 # LaneJs - A REST and ROUTING solution for node
+[![npm version](https://badge.fury.io/js/lane-js.svg)](https://badge.fury.io/js/lane-js)
 
 LaneJs is a lightweigh routing solution for node [node](https://nodejs.org)
-[![npm version](https://badge.fury.io/js/lane-js.svg)](https://badge.fury.io/js/lane-js)
 
 A basic route in LaneJs looks like this : 
 ```

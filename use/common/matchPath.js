@@ -1,4 +1,3 @@
-
 module.exports = function matchPathName(pathname, pathmap) {
   pathmap.forEach(eachPath => {
     let path = []
