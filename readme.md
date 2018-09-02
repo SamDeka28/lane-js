@@ -1,160 +1,209 @@
-***LaneJs - A REST API solution for node***
-====================================
+
+# LaneJs - A REST and ROUTING solution for node
 [![npm version](https://badge.fury.io/js/lane-js.svg)](https://badge.fury.io/js/lane-js)
 
-LaneJs is a light weight routing solution for creating REST API's.
-It's design is inspired by node's popular framework -ExpressJs, and the routing
-is Django inspired. It has a simplified and a small core that handles all the routing.
-This framework doesn't bend you to the rules. Using the node's core API is recommended.
-In today's world, nodeJs has been evolving ever since it's inception. Though due to the
-heavy dependency of the developer upon frameworks, use of nodeJs strong core API is somewhere
-lost. We, at Lane, welcomes you to use the Node's core API, although you do not have to write
-you routing solution yourself. The main objective of Lane is to provide you the routing solution
-you need. 
+LaneJs is a lightweigh routing solution for node [node](https://nodejs.org)
 
-LaneJs, itself is developed using only the Node's core API.
+A basic route in LaneJs looks like this : 
+```
+const { route }= require('lane-js/use/router');
+module.export = (req,res) => {
+  route(req,res).get('/index',function(err,req,res){
+      res.end('Hello World')
+  }
+}
+```
 
-How to use Lane 
-================
-Lane routing is inspired by the python's DJANGO framework. Therefore, we define the routes in the
-urlConfig.
+### Insallating LaneJs
+> before installing LaneJs, you must have node installed in your system
+LaneJs can be installed by using the `npm install` command
+```
+npm install lane-js --save
+```
+### Features 
+- Fast Routing
+- Middleware Support (new in this version)
+- Improved Performance 
+- Body parsing support
+- Param parsing support (new in this version)
+- Multipath routes
 
-A Basic example of the url config
-=================================
+## A Quick guide to start with LaneJs
+To quickly get started with LaneJs, clone the [https://github.com/SamDeka28/demolane](https://github.com/SamDeka28/demolane)
 
-<code>
-    
-    let { index, home, create, del } = require("../lanes/index")
+Once you have cloned the repo, `cd demolane && npm install lane-js --save`
 
-    var urlConfig = {
-        "paths": {
-            "/index": index,
-            "/": index,
-        }
-    }
-</code>
+## Directory Structure
+To create a LaneJs application, create a directory structure identical to the structure given below
+```
+yourappname
+    --configs
+      --config.json
+      --paths.map.json
+    --urlConfig
+      --index.js
+    --app.js
+```
+Once you have created the structure, open the terminal and browse to your app directory
+Type in the following commands and follow the instructions: 
+```
+npm init
+```
+This will create you package.json file
 
-The urlConfig is an Object that contain "paths" child, where we can define the routes. The urlConfig resides
-in the app root inside the urlConfig directory.
+### Installing the dependencies
+To install LaneJs, typein the command in your terminal
+```
+npm install --save lane-js
+```
+This will install LaneJs as your project dependency
 
-Creating the Lane Server
-========================
-The Lane server can be created just in a snap by using a simple code snippet and configuration
+## Creating the Server
+Open your app.js file and paste in the following code to create the LaneJs server : 
 
-<code>
+```
+var config = require("./configs/config.json")
 
-    const config = require("./configs/config.json");
-    const Scratch = require("lane-js");
-    config.app_root = __dirname; /* required */
-    
-    const app = Scratch();
+const Server = require("lane-js")
 
-    app.listen(3001, "127.0.0.1", () => console.log("Server is up and running at port 3001"))
-</code>
+config.app_root = __dirname //set the app_root to the current working directory
 
-The configs
-===============
-The configs directory consists of the mandatory file.
+const app = Server() //create the server
 
-1. `config.json`: config.json is a requied file for LaneJs which resides in the application root inside the configs directory. The snippet below shows the required keys for the config.json file
+// finally listen to a port and start the server
+app.listen(3000, "127.0.0.1", () => console.log("Server is up and running at port 3000"))
+```
 
-<code>
+Open the config.json file (configs/config.json), and add the JSON :
+```
+{
+  app_root = ''
+}
+```
 
-    "template_directory": "views",
-    "app_root" : "",
-    "template_static" : "views/static",
-    "template_engine" : "ejs" // required only if you are using ejs
+Open the paths.map.json (configs/paths.map.json) and paste in the following :
+```
+{
+  "paths": []
+}
+```
 
-</code>
-the ejs template engine is just a side support in Lane because LaneJs's main objective is to provide routing for REST API's
+Thats all for creating the server
 
-2. `paths.map.json` :  the paths.map.json is a required file in LaneJs. This file contains a JSON containing only a single key 'paths' of type array. This file is used by Lane to keep track of the routes that has been created. the file automatically get rewritten when calling the "/generatePathMap" is called from the url. Once you create a route and define it in the urlConfig, hit the /generatePathMap so that the newly created route is now usable. 
+## Routing
+Creating a basic route in LaneJs involves requiring the route method from the router module of LaneJs
+```
+const { route } = require("lane-js/use/router")
 
+module.export = (req,res)=>{
+  route( req, res).get( '/', function( err, req, res)=>{
+    req.end("Welcome to LaneJs)
+  })
+}
+```
+Once the route is created, you need to declare it in the urlConfig. Move to the urlConfig folder and open index.js. Declare the created route as : 
+```
+const urlConfig = {
+  "paths" : require("/path/to/route")
+}
 
+module.exports = urlConfig
+```
 
-Router in Lane
-===============
-Creating Routes in Lane is pretty simple, It somewhere resembles the Express kind of routing.
-To create a Route in Lane, import the router module as :
+Once you have declared the route in the urlConfig, start the server `node app.js`. Head to the browser and paste the url [http://localhost:3000/generatePathMap](http://localhost:3000/generatePathMap). This will register the created route in the paths.map.json file.
+Once registered, you can use the route that you have created.
+> Whenever you create a new route, it is mandatory to declare it in the urlConfig. The route will not be activated until the /generatePathMap is called.
 
-`var { route } = require("lane-js/use/router")`
+### Path Params
 
-Now, you can create the route by using the "route" object as : 
+A basic example of defining path params is shown below:
+```
+const { route } = require("lane-js/use/router")
 
-<code>
-    
-    var { route } = require("lane-js/use/router")
-    var { indexhandler } = require("../models/index")
+module.export = (req,res)=>{
+  route( req, res).get( '/user/:id', function( err, req, res)=>{
+    req.end("Welcome to LaneJs)
+  })
+}
+``` 
+> You need to define the exact path in the urlConfig to make it available for use 
 
-    module.exports.index = (req, res) => {
-        route.get(['/', '/index'], { request: req, response: res }, indexhandler)
-    }
-</code>
+> You can define multiple params in a path. eg : '/user/:id/name/:name'.
 
-As you can see, the route is of type GET http method. It takes in a path as a string or an 
-array of path string.. In the above example ['/', '/index'] will route you to the same route handler.
+### Query Strings
 
-Breaking the route syntax in Lane
-=================================
-The syntax for route in Lane is :
+The Query string of a url can accessed in a route using `req.query`. `req.query` returns an object with key-value pairs.
 
-`routeObject.httpVerb(path : String | Array, { request : requestObject , response : response object} , routehandler)`
+For example: Suppose a user request an url `'http://localhost:3000/?fname=John&lname=Doe'`. The value of *fname* and *lname* can be accessed as `req.query.fname` and `req.query.lname` respectively.
 
-Creating the route handler
-==========================
-The route handler in Lane is pretty simple as it uses the Node's native API. 
-A basic example of a route handler is shown below:
+## Middlewares
 
-<code>
+Middlewares are functions that manipulates the request and the response object. Middlewares is LaneJs are of two type : 
+- **Application level** : Application level middlewares are available throughout the application.
+To use a application level middleware, you need to declare in the app.js file when you are creating the server by passing { middlewares : [ middlewarename ]} in the server method.
+> the 'middlewares' is an array of middleware function. The middlewares will be executed in the sequence they are defined
 
-    var handler = async (err, req, res) => {
-        var renderable = "Welcome to you first Lane application";
-        res.write(renderable);
-        res.end();
-    }
-    module.exports = { indexhandler: handler }
+```
+var app = Server({ middlewares : [] })
+```
 
-</code>
+- **Route level** : Route level middlewares are available for the route where it is declared. To use middlewares in a route, pass a third parameter in the route() function as an object that contains the middlewares array
 
-The handler takes in three params : (error, request, response)
-1. `error` - Any error encountered by the route
-2. `request` - Server request object.The querystring object and the payload are exposed through request.query and request.payload
-3. `response` - Server response object. 
+``` 
+route( req, res, { middlewares : [] }).get("/", handler)
+```
 
-Redirection in Lane
-===================
-To redirect a to another path from a handler, we fist need to import the redirect object from the router module as :
+### Creating your own middleware in LaneJs
 
-`var { redirect } = require("lane-js/use/router")`
+Creating a middleware in LaneJs requires passing the *request* and the *response* object to the middleware function and return back the *request* and *response* from that function. A basic sample of a middleware function is shown below : 
+
+``` 
+function mymiddleware(req,res){
+  req.sayHello = ()=>{
+    return "Hello"
+  }
+  return [req,res]
+}
+```
+Once you have created the middleware, declare it in a route or at an application level. Now, when you console log  `req.sayHello()`, "Hello" will be logged to the console.
+
+## Form handling
+
+LaneJs, by default, can handle `x-www-from-urlencoded` data while using the post method. The data passed is made available in the `req.body` as an object with key-value pair.
+
+## Redirection
+
+To redirect to another path from a handler, we need to import the **redirect** object from the router module as :
+```
+var { redirect } = require("lane-js/use/router")
+```
 
 The syntax for redirection is fairly simple
+```
+redirect(pathname : String, res : ServerResponse)
+```
 
-`redirect(pathname : String, res : ServerResponse)`
-
-Render a Html in Lane : 
-======================
-Import
+## Rendering : 
 
 `var { render } = require("lane-js/use/router")`
 
-The render object of LaneJs provides two kind of rendering:
-Inbuilt String interpolated Redering and EJs rendering
-To use the Inbult String interpolated Redering capabilty for simple render:
-<code>
-
+The render method of LaneJs provide two kind of rendering:
+- Inbuilt String interpolated Redering and 
+- EJs rendering
+- 
+To use the Inbuilt String interpolated Redering capabilty for simple render, pass in an object of replacables : 
+```
     let content = {
             'page-title':"trajectory.io",
-            'page-content':"welcome to the first trajectory application",
+            'page-content':"welcome to the first LaneJs application",
             'application' : 'Lane<span style="color: tomato">Js</span>'
         }
 
     var renderable = await render({ "templateName": "index.html", replacable : content });
-
-</code>
+```
 
 And in the html :
-<snippet>
-    
+```
     <!DOCTYPE html>
     <html lang="en">
     <head>
@@ -188,21 +237,17 @@ And in the html :
         </div>
     </body>
     </html>
-    
-</snippet>
+```
 
 
 If you are using the ejs engine, you need to sepecify template_engine : "ejs" in the object passed to the render method:
 
-<code>
-    
-    let user = await User.find(); /* fetching the data from the database */
-    let content = await render({ "templateName": "index.ejs", "template_engine": "ejs", "data": { "data": user }, res: res })
+```
+let user = await User.find(); /* fetching the data from the database */
+let content = await render({ "templateName": "index.ejs", "template_engine": "ejs", "data": { "data": user }, res: res })
+```
 
-</code>
-
-<snippet>
-    
+```
     <!DOCTYPE html>
     <html lang="en">
 
@@ -224,16 +269,16 @@ If you are using the ejs engine, you need to sepecify template_engine : "ejs" in
                     <form method="POST" action="/create">
                         <div class="row">
                             <div class="col-md-2">
-                                <input type="text" name="name" pLaneholder="name" class="form-control">
+                                <input type="text" name="name" placeholder="name" class="form-control">
                             </div>
                             <div class="col-md-2">
-                                <input type="text" name="username" pLaneholder="username" class="form-control">
+                                <input type="text" name="username" placeholder="username" class="form-control">
                             </div>
                             <div class="col-md-2">
-                                <input type="text" name="email" pLaneholder="email" class="form-control">
+                                <input type="text" name="email" placeholder="email" class="form-control">
                             </div>
                             <div class="col-md-2">
-                                <input type="text" name="password" pLaneholder="password" class="form-control">
+                                <input type="text" name="password" placeholder="password" class="form-control">
                             </div>
                             <div class="col-md-2">
                                 <input type="submit" value="add" class="btn btn-primary">
@@ -276,8 +321,8 @@ If you are using the ejs engine, you need to sepecify template_engine : "ejs" in
                 </div>
             </div>
         </div>
-
     </body>
 
     </html>
-</snippet>
+```
+
