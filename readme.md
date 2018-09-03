@@ -14,7 +14,7 @@ module.export = (req,res) => {
 }
 ```
 
-### Insallating LaneJs
+### Installing LaneJs
 > before installing LaneJs, you must have node installed in your system.
 LaneJs can be installed by using the `npm install` command
 ```
