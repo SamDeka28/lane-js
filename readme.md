@@ -10,12 +10,12 @@ const { route }= require('lane-js/use/router');
 module.export = (req,res) => {
   route(req,res).get('/index',function(err,req,res){
       res.end('Hello World')
-  }
+  })
 }
 ```
 
-### Insallating LaneJs
-> before installing LaneJs, you must have node installed in your system
+### Installing LaneJs
+> before installing LaneJs, you must have node installed in your system.
 LaneJs can be installed by using the `npm install` command
 ```
 npm install lane-js --save
@@ -31,7 +31,12 @@ npm install lane-js --save
 ## A Quick guide to start with LaneJs
 To quickly get started with LaneJs, clone the [https://github.com/SamDeka28/demolane](https://github.com/SamDeka28/demolane)
 
-Once you have cloned the repo, `cd demolane && npm install lane-js --save`
+Once you have cloned the repo, 
+```
+cd demolane
+npm init
+npm install lane-js --save
+```
 
 ## Directory Structure
 To create a LaneJs application, create a directory structure identical to the structure given below
@@ -104,7 +109,9 @@ module.export = (req,res)=>{
 Once the route is created, you need to declare it in the urlConfig. Move to the urlConfig folder and open index.js. Declare the created route as : 
 ```
 const urlConfig = {
-  "paths" : require("/path/to/route")
+  "paths" : [
+      "/": require("/path/to/route")
+   ]
 }
 
 module.exports = urlConfig
@@ -113,6 +120,14 @@ module.exports = urlConfig
 Once you have declared the route in the urlConfig, start the server `node app.js`. Head to the browser and paste the url [http://localhost:3000/generatePathMap](http://localhost:3000/generatePathMap). This will register the created route in the paths.map.json file.
 Once registered, you can use the route that you have created.
 > Whenever you create a new route, it is mandatory to declare it in the urlConfig. The route will not be activated until the /generatePathMap is called.
+
+## Path Registration
+By default, path registration is set to true, i.e when you head to the */generatePathMap* route in your application, it will allow you to register newly created paths that has been declared in the `urlConfig`.
+To disable *path registration*, you can pass `routegeneration : false` in the server method.
+
+```
+const app = Server({ routegeneration : false })
+```
 
 ### Path Params
 
@@ -132,13 +147,13 @@ module.export = (req,res)=>{
 
 ### Query Strings
 
-The Query string of a url can accessed in a route using `req.query`. `req.query` returns an object with key-value pairs.
+The Query string of a url can be accessed in a route using `req.query`. `req.query` returns an object with key-value pairs.
 
 For example: Suppose a user request an url `'http://localhost:3000/?fname=John&lname=Doe'`. The value of *fname* and *lname* can be accessed as `req.query.fname` and `req.query.lname` respectively.
 
 ## Middlewares
 
-Middlewares are functions that manipulates the request and the response object. Middlewares is LaneJs are of two type : 
+Middlewares are functions that manipulates the request and the response object. Middlewares in LaneJs are of two types : 
 - **Application level** : Application level middlewares are available throughout the application.
 To use a application level middleware, you need to declare in the app.js file when you are creating the server by passing { middlewares : [ middlewarename ]} in the server method.
 > the 'middlewares' is an array of middleware function. The middlewares will be executed in the sequence they are defined
@@ -190,7 +205,7 @@ redirect(pathname : String, res : ServerResponse)
 The render method of LaneJs provide two kind of rendering:
 - Inbuilt String interpolated Redering and 
 - EJs rendering
-- 
+
 To use the Inbuilt String interpolated Redering capabilty for simple render, pass in an object of replacables : 
 ```
     let content = {
@@ -265,7 +280,7 @@ let content = await render({ "templateName": "index.ejs", "template_engine": "ej
         <div class="container">
             <div class="row">
                 <div class="col-md-12">
-                    <h1>CRUD IN SCRATCH.IO</h1>
+                    <h1>EJS render</h1>
                     <form method="POST" action="/create">
                         <div class="row">
                             <div class="col-md-2">
