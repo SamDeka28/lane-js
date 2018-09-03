@@ -96,7 +96,7 @@ const { route } = require("lane-js/use/router")
 
 module.export = (req,res)=>{
   route( req, res).get( '/', function( err, req, res)=>{
-    req.end("Welcome to LaneJs")
+    res.end("Welcome to LaneJs")
   })
 }
 ```
@@ -131,7 +131,7 @@ const { route } = require("lane-js/use/router")
 
 module.export = (req,res)=>{
   route( req, res).get( '/user/:id', function( err, req, res)=>{
-    req.end("Welcome to LaneJs")
+    res.end("Welcome to LaneJs")
   })
 }
 ``` 
@@ -209,6 +209,7 @@ To use the Inbuilt String interpolated Redering capabilty for simple render, pas
         }
 
     var renderable = await render({ "templateName": "index.html", replacable : content });
+    res.end(renderable)
 ```
 
 And in the html :
