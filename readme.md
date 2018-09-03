@@ -109,7 +109,9 @@ module.export = (req,res)=>{
 Once the route is created, you need to declare it in the urlConfig. Move to the urlConfig folder and open index.js. Declare the created route as : 
 ```
 const urlConfig = {
-  "paths" : require("/path/to/route")
+  "paths" : [
+      "/": require("/path/to/route")
+   ]
 }
 
 module.exports = urlConfig
