@@ -1,0 +1,22 @@
+{
+  "description": "A lightweight REST ()\u001b[Drouting) framework for node",
+  "keywords": [
+    "laneJs",
+    "framework",
+    "routing",
+    "rest",
+    "node",
+    "api",
+    "restful"
+  ],
+  "license": "MIT",
+  "main": "index.js",
+  "name": "lane-js",
+  "scripts": {
+    "test": "test"
+  },
+  "version": "1.0.2",
+  "dependencies": {
+    "ejs": "^2.6.1"
+  }
+}

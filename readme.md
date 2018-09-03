@@ -2,7 +2,7 @@
 # LaneJs - A REST and ROUTING solution for node
 [![npm version](https://badge.fury.io/js/lane-js.svg)](https://badge.fury.io/js/lane-js)
 
-LaneJs is a lightweigh routing solution for node [node](https://nodejs.org)
+LaneJs is a lightweigh routing solution for [node](https://nodejs.org)
 
 A basic route in LaneJs looks like this : 
 ```
@@ -29,14 +29,9 @@ npm install lane-js --save
 - Multipath routes
 
 ## A Quick guide to start with LaneJs
-To quickly get started with LaneJs, clone the [https://github.com/SamDeka28/demolane](https://github.com/SamDeka28/demolane)
+To quickly get started with LaneJs, go to  [https://github.com/SamDeka28/demolane](https://github.com/SamDeka28/demolane) and clone the repo.
 
-Once you have cloned the repo, 
-```
-cd demolane
-npm init
-npm install lane-js --save
-```
+Once you have cloned the repo, follow the instructions given in the readme.md of the repository
 
 ## Directory Structure
 To create a LaneJs application, create a directory structure identical to the structure given below
@@ -71,11 +66,10 @@ var config = require("./configs/config.json")
 
 const Server = require("lane-js")
 
-config.app_root = __dirname //set the app_root to the current working directory
+config.app_root = __dirname
 
 const app = Server() //create the server
 
-// finally listen to a port and start the server
 app.listen(3000, "127.0.0.1", () => console.log("Server is up and running at port 3000"))
 ```
 
@@ -102,7 +96,7 @@ const { route } = require("lane-js/use/router")
 
 module.export = (req,res)=>{
   route( req, res).get( '/', function( err, req, res)=>{
-    req.end("Welcome to LaneJs)
+    req.end("Welcome to LaneJs")
   })
 }
 ```
@@ -121,6 +115,14 @@ Once you have declared the route in the urlConfig, start the server `node app.js
 Once registered, you can use the route that you have created.
 > Whenever you create a new route, it is mandatory to declare it in the urlConfig. The route will not be activated until the /generatePathMap is called.
 
+## Registering a Route
+
+By default, `routegeneration` is set to true, i.e you can register a newly created route when you head to the */generatePathMap* route in the browser once the route has been declared in the *urlConfig*. To disable registration of routes, you can pass `routegeneration : false` in the `Server` method. 
+
+```
+const app = Server({ routegeneration : false })
+```
+
 ### Path Params
 
 A basic example of defining path params is shown below:
@@ -129,7 +131,7 @@ const { route } = require("lane-js/use/router")
 
 module.export = (req,res)=>{
   route( req, res).get( '/user/:id', function( err, req, res)=>{
-    req.end("Welcome to LaneJs)
+    req.end("Welcome to LaneJs")
   })
 }
 ``` 
@@ -245,7 +247,14 @@ And in the html :
     </body>
     </html>
 ```
-
+> if you are using bootstrap and jquery like in the html snippet given below, you need to download the binaries and provide the relative path of the directory that contains the binaries in the config.js as :
+```
+{
+    "app_root" : "",
+    "template_static" : "path/to/directory"
+}
+```
+> Any static asset that needs to be used in the application should be put inside the `static` directory and the path should be registered in the `template_static` key in the config.json file
 
 If you are using the ejs engine, you need to sepecify template_engine : "ejs" in the object passed to the render method:
 
