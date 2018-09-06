@@ -2,7 +2,7 @@
 # LaneJs - A REST and ROUTING solution for node
 [![npm version](https://badge.fury.io/js/lane-js.svg)](https://badge.fury.io/js/lane-js)
 
-LaneJs is a lightweigh routing solution for [node](https://nodejs.org)
+LaneJs is a lightweight routing solution for [node](https://nodejs.org)
 
 A basic route in LaneJs looks like this : 
 ```
@@ -103,9 +103,9 @@ module.export = (req,res)=>{
 Once the route is created, you need to declare it in the urlConfig. Move to the urlConfig folder and open index.js. Declare the created route as : 
 ```
 const urlConfig = {
-  "paths" : [
+  "paths" : {
       "/": require("/path/to/route")
-   ]
+   }
 }
 
 module.exports = urlConfig
