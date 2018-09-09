@@ -36,7 +36,7 @@ npm install lane-js --save
 > From this version, /generatePathMap has been disabled. There is no need of registering a route. A route is automatically registered and made available for use once it is defined in the urlConfig/index.js
 
 ## A Quick guide to start with LaneJs
-To quickly get started with LaneJs, go to  [https://github.com/SamDeka28/demolane](https://github.com/SamDeka28/demolane) and clone the repo.
+To quickly get started with LaneJs, go to  [https://github.com/SamDeka28/lanify](https://github.com/SamDeka28/lanify) and clone the repo.
 
 Once you have cloned the repo, follow the instructions given in the readme.md of the repository
 
