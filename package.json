@@ -18,7 +18,11 @@
   "scripts": {
     "test": "test"
   },
-  "version": "1.0.2",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/SamDeka28/lane-js"
+  },
+  "version": "1.0.4",
   "dependencies": {
     "ejs": "^2.6.1"
   }

@@ -9,16 +9,22 @@
 */
 
 const http = require('http')
-const urlConfig = require("../../../urlConfig")
 const url = require("url")
 const er404 = require("./router").error['404']
-const serveStatic = require("./router")
-const pathmap = require("../../../configs/paths.map.json")
+const { serve, setUrlConfigs, setServerOption } = require("./router")
 const middleware = require("./middleware")
-const routeGen = require("./routegenerate")
+const { rendererOptions } = require("./render")
 const matchPathName = require("./common/matchPath")
 //Creating the server
 var LaneJs = function (serverOption) {
+    try {
+        //set urlConfig to be accesible by the router
+        setUrlConfigs(Object.keys(serverOption.urls.paths))
+        //set serverOption to be accessible by the render method
+        rendererOptions(serverOption)
+        // set Server Options For Router
+        setServerOption(serverOption)
+    } catch (err) { console.log(err) }
 
     const server = http.createServer(async (request, response) => {
 
@@ -28,35 +34,22 @@ var LaneJs = function (serverOption) {
         var urlOb = url.parse(req.url)
         // extract the pathname from the url Object
         var pathname = urlOb.pathname
-
-        // disable or enable route generation 
-        if (serverOption && serverOption.routegeneration != undefined) {
-            routeGen.routegeneration = !serverOption.routegeneration ? false : true
-        } else {
-            routeGen.routegeneration = true
+        // the urls from the urlConfig
+        try {
+            var urlConfig = serverOption.urls
+        } catch (err) {
+            console.log(err)
         }
 
-        // the code snippet below is used to generate the path map i.e the route path in a JSON file 
-        //'paths.map.json' . This file is used to keep a track of the routes that has been created 
-        // when the generatePathMap route is hitted, it goes throught all the routes and registers it
-        if (pathname == "/generatePathMap") {
-            var pathsKeys = Object.keys(urlConfig.paths)
-            try {
-                pathsKeys.forEach(pathkey => {
-                    urlConfig.paths[pathkey](req, res)
-                })
-            } catch (err) {
-                console.error(err)
-                res.end(err)
-            }
-        }
-        if (!pathmap.paths.includes(pathname)) {
-            var matchedPath = matchPathName(pathname, pathmap.paths)
+        let urlKeys = Object.keys(urlConfig.paths)
+
+        if (!urlKeys.includes(pathname)) {
+            var matchedPath = matchPathName(pathname, urlKeys)
         } else {
             matchedPath = pathname
         }
         // Performs a check to see if the pathname of the url matches with the registered path 
-        if (pathmap.paths.includes(matchedPath)) {
+        if (urlKeys.includes(matchedPath)) {
             try {
                 return await urlConfig.paths[matchedPath](req, res)
             } catch (err) {
@@ -65,7 +58,7 @@ var LaneJs = function (serverOption) {
         } else {
             // if the pathname is not registered, the application treats the url as a static or a foreigner
             if (req.headers.referer != undefined && req.method == "GET" && matchedPath != "/favicon.ico") {
-                return await serveStatic.serve({ request: req, response: res }, req.headers.referer, matchedPath)
+                return await serve({ request: req, response: res, serverOption: serverOption }, req.headers.referer, matchedPath)
             }
         }
         // If the application is unable to find the url then it return a 404 ERROR 

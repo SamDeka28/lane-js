@@ -1,7 +1,6 @@
 module.exports = function matchPathName(pathname, pathmap) {
   pathmap.forEach(eachPath => {
     let path = []
-    let newPathMap = []
     let newPathname = []
 
     path = eachPath.split("/")

@@ -2,7 +2,7 @@
 # LaneJs - A REST and ROUTING solution for node
 [![npm version](https://badge.fury.io/js/lane-js.svg)](https://badge.fury.io/js/lane-js)
 
-LaneJs is a lightweight routing solution for [node](https://nodejs.org)
+LaneJs is a lightweight routing solution for [Node.Js](https://nodejs.org)
 
 A basic route in LaneJs looks like this : 
 ```
@@ -22,11 +22,18 @@ npm install lane-js --save
 ```
 ### Features 
 - Fast Routing
-- Middleware Support (new in this version)
+- Middleware Support
 - Improved Performance 
 - Body parsing support
-- Param parsing support (new in this version)
+- Param parsing support
 - Multipath routes
+
+### CHANGELOGS
+- Added `pathify` for modular dependency of urlConfigs
+- Removed Route generation
+- Removed dependency of configs/config.json and configs/paths.map.json
+
+> From this version, /generatePathMap has been disabled. There is no need of registering a route. A route is automatically registered and made available for use once it is defined in the urlConfig/index.js
 
 ## A Quick guide to start with LaneJs
 To quickly get started with LaneJs, go to  [https://github.com/SamDeka28/demolane](https://github.com/SamDeka28/demolane) and clone the repo.
@@ -37,13 +44,12 @@ Once you have cloned the repo, follow the instructions given in the readme.md of
 To create a LaneJs application, create a directory structure identical to the structure given below
 ```
 yourappname
-    --configs
-      --config.json
-      --paths.map.json
     --urlConfig
       --index.js
     --app.js
 ```
+> It is not mandatory to create the same directory structure. You can structure your application the way you want. The only neccessary file here is the app.js (you can name it whatever you like) for initializing the server
+
 Once you have created the structure, open the terminal and browse to your app directory
 Type in the following commands and follow the instructions: 
 ```
@@ -62,66 +68,76 @@ This will install LaneJs as your project dependency
 Open your app.js file and paste in the following code to create the LaneJs server : 
 
 ```
-var config = require("./configs/config.json")
+const urlConfig = require("./urlConfig")
 
 const Server = require("lane-js")
 
-config.app_root = __dirname
-
-const app = Server() //create the server
+const app = Server({ urls : urlConfig })
 
 app.listen(3000, "127.0.0.1", () => console.log("Server is up and running at port 3000"))
 ```
 
-Open the config.json file (configs/config.json), and add the JSON :
-```
-{
-  app_root = ''
-}
-```
-
-Open the paths.map.json (configs/paths.map.json) and paste in the following :
-```
-{
-  "paths": []
-}
-```
-
 Thats all for creating the server
 
+## Server Options
+- **middlewares** : middlewares takes in an array of middleware function that can transform the request an response object before it reaches the route handler.
+```
+const app = Server({ middlewares : [
+    function lane(req, res) {
+        console.log("hello")
+        return [req, res]
+    }
+] })
+```
+
+- **urls** : this is the urlConfig, that contains a `paths` key which is an object of routes defined for the application
+```
+let urlConfig = {
+    "paths": {
+        "/": require("path/to/route"),
+    }
+}
+const app = Server({ urls : urlConfig })
+```
+- **template_directory** : the relative path for the directory that contains your static html or ejs files
+```
+const app = Server({ template_directory: "views" })
+```
+- **template_static** : the relative path for the directory that contains you static assets such as boostrap files, jquery files, images etc
+```
+const app = Server({ template_static: "views/static" })
+```
+- **template_engine** : the template engine that you are using, currently we only support ejs for rendering views.
+```
+const app = Server({ template_engine: "ejs" })
+```
+
+
 ## Routing
-Creating a basic route in LaneJs involves requiring the route method from the router module of LaneJs
+Creating a basic route in LaneJs involves requiring the `route` method from the router module of LaneJs
 ```
 const { route } = require("lane-js/use/router")
 
 module.export = (req,res)=>{
   route( req, res).get( '/', function( err, req, res)=>{
-    res.end("Welcome to LaneJs")
+    req.end("Welcome to LaneJs")
   })
 }
 ```
-Once the route is created, you need to declare it in the urlConfig. Move to the urlConfig folder and open index.js. Declare the created route as : 
+Once the route is created, you need to declare it in the *urlConfig*. Move to the urlConfig folder and open index.js. Declare the created route as : 
 ```
 const urlConfig = {
   "paths" : {
       "/": require("/path/to/route")
-   }
+  }
 }
 
 module.exports = urlConfig
 ```
 
-Once you have declared the route in the urlConfig, start the server `node app.js`. Head to the browser and paste the url [http://localhost:3000/generatePathMap](http://localhost:3000/generatePathMap). This will register the created route in the paths.map.json file.
-Once registered, you can use the route that you have created.
-> Whenever you create a new route, it is mandatory to declare it in the urlConfig. The route will not be activated until the /generatePathMap is called.
+Once you have declared the route in the urlConfig, start the server `node app.js`. You can now use the route that you have created.
 
-## Registering a Route
-
-By default, `routegeneration` is set to true, i.e you can register a newly created route when you head to the */generatePathMap* route in the browser once the route has been declared in the *urlConfig*. To disable registration of routes, you can pass `routegeneration : false` in the `Server` method. 
-
-```
-const app = Server({ routegeneration : false })
-```
+> Ensure that you have required the urlConfig in the app.js file and passed it to the server method as : `const app = Server({ urls : urlConfig })`
 
 ### Path Params
 
@@ -131,10 +147,13 @@ const { route } = require("lane-js/use/router")
 
 module.export = (req,res)=>{
   route( req, res).get( '/user/:id', function( err, req, res)=>{
-    res.end("Welcome to LaneJs")
+    req.end("Welcome to LaneJs")
   })
 }
 ``` 
+
+The params can be accessed in a route using `req.params`
+
 > You need to define the exact path in the urlConfig to make it available for use 
 
 > You can define multiple params in a path. eg : '/user/:id/name/:name'.
@@ -191,6 +210,10 @@ The syntax for redirection is fairly simple
 ```
 redirect(pathname : String, res : ServerResponse)
 ```
+Example : 
+```
+redirect("https://www.google.com",res)
+```
 
 ## Rendering : 
 
@@ -209,7 +232,6 @@ To use the Inbuilt String interpolated Redering capabilty for simple render, pas
         }
 
     var renderable = await render({ "templateName": "index.html", replacable : content });
-    res.end(renderable)
 ```
 
 And in the html :
@@ -248,14 +270,11 @@ And in the html :
     </body>
     </html>
 ```
-> if you are using bootstrap and jquery like in the html snippet given below, you need to download the binaries and provide the relative path of the directory that contains the binaries in the config.js as :
+> if you are using bootstrap and jquery like in the html snippet given below, you need to download the binaries and provide the relative path of the directory that contains the binaries and pass it to the server :
 ```
-{
-    "app_root" : "",
-    "template_static" : "path/to/directory"
-}
+const app = Server({ "template_static" : "path/to/directory" })
 ```
-> Any static asset that needs to be used in the application should be put inside the `static` directory and the path should be registered in the `template_static` key in the config.json file
+> Any static asset that needs to be used in the application should be put inside the `static` directory and the path should be registered in the `template_static` key and should be passed to the server method
 
 If you are using the ejs engine, you need to sepecify template_engine : "ejs" in the object passed to the render method:
 
@@ -343,3 +362,5 @@ let content = await render({ "templateName": "index.ejs", "template_engine": "ej
     </html>
 ```
 
+### LICENSE 
+Licensed under **MIT**

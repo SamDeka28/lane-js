@@ -1,41 +1,33 @@
 // imports
 const url = require('url')
-const fs = require('fs')
-const http = require('http')
-const readFile = fs.readFileSync
 const queryString = require('querystring')
-const config = require("../../../configs/config.json")
-const path = require("path")
-const registered_path = require("../../../configs/paths.map.json")
-const ejs = require("ejs")
-const pathmap = require("../../../configs/paths.map.json")
 const middleware = require("./middleware")
 const serveStatic = require("./serveStatics")
-const routeGen = require("./routegenerate")
-const registerPaths = require("./registerPaths")
 const { render, ejsrender } = require("./render")
 const matchPathname = require("./common/matchPath")
 const paramParser = require("./common/paramParser")
-// this function expression is called when the generatePathMap route is hitted. It basically 
-// is used to check the type of the path of the specified route (LaneJs.io provides multiple pathname
-// per route). So, if multiple pathname is specified for a route, it itterates over the array object,
-// and call the registerPath function for each pathname
-var callToRegisterPath = path => typeof (path) == "object" ? path.forEach(lane => { registerPaths(lane) }) : registerPaths(path)
-
+const urlConfig = { paths: [] }
+const appOptions = {}
 // Function Signature: route(path : String/Array, httpload : JSON {request,response}, 
 // callback : Function (params ==>(serverRequest,serverResponse,queryString:optional)))
 // queryStrings in the callback can be accessed by the queryString object's 'get' key
 // the server request object will be available through the 1st parameter of the callback
 // the server response object will be available through the 2nd parameter of the callback
-function route(request, response, serverOption) {
+function route(request, response, options) {
+    let serverOption = {}
     //modify the req and res if middleware exists
+    if (typeof options == "object" || options != undefined) {
+        Object.assign(serverOption, options)
+    }
+    serverOption.urls = urlConfig
+
     let { req, res } = middleware(serverOption, request, response)
-    let load = { request: req, response: res }
+    let load = { request: req, response: res, serverOption: Object.assign(serverOption, appOptions) }
     //creates a parsed url object from the url
     let urlOb = url.parse(req.url)
     //extract the pathname from the parsed url object
     let path = urlOb.pathname
-    console.log(req.method, path, response.statusCode)
+
     return {
         // this is GET Http method function expression. All the Http method function expression takes
         // three arguments, the pathspec is the pathname(string | Array) specified when creating the route,
@@ -43,32 +35,19 @@ function route(request, response, serverOption) {
         // and the callback handler for the route
         //
         get: async (pathspec, callback) => {
-            // callToRegiterPath is used to generate path maps, this method get fired only when the generatePathMap
-            // route is called
-
-            routeGen.routegeneration ? callToRegisterPath(pathspec) : res.end("Un-authorized")
 
             // checks if the HTTP method is GET
             if (req.method == "GET") {
 
-                // extractParams(pathname,pathspec)
                 req.params = paramParser(path, pathspec)
-                try {
-                    pathspec = typeof pathspec == 'object' ? pathspec : [pathspec]
-                    var pathname = matchPathname(path, pathspec)
-                } catch (err) {
-                    pathspec(err)
-                }
+
+                var pathname;
+                //checks for matched path
+                ({ pathname, pathspec } = checkPath(pathspec));
                 //parse the queryString if any
                 let rawQuery = queryString.parse(urlOb.query)
 
                 rawQuery ? req.query = rawQuery : null
-                // because the generatePathMap is of type HTTP GET method, when the route is called,
-                // the path pathname is checked and if is a generatePathMap call, then return a simple
-                // success response 
-                if (pathname == "/generatePathMap") {
-                    res.end("Path map generated successfully")
-                }
 
                 // serves the statics associated with a html file, such as bootstrap, jquery etc
                 serveStatic(load, pathspec, pathname)
@@ -83,26 +62,17 @@ function route(request, response, serverOption) {
         },
         delete: async (pathspec, callback) => {
 
-            routeGen.routegeneration ? callToRegisterPath(pathspec) : res.end("Un-authorized")
-
-            // extractParams(pathname,pathspec)
             req.params = paramParser(path, pathspec)
-            try {
-                pathspec = typeof pathspec == 'object' ? pathspec : [pathspec]
-                var pathname = matchPathname(path, pathspec)
-            } catch (err) {
-                pathspec(err)
-            }
+
+            var pathname;
+            //checks for matched path
+            ({ pathname, pathspec } = checkPath(pathspec));
 
             if (req.method == "DELETE") {
 
                 let rawQuery = queryString.parse(urlOb.query)
 
                 rawQuery ? req.query = rawQuery : null
-
-                if (pathname == "/generatePathMap") {
-                    res.end("Path map generated successfully")
-                }
 
                 serveStatic(load, pathspec, pathname)
 
@@ -111,20 +81,15 @@ function route(request, response, serverOption) {
                 invalidHttp(res);
             }
         },
-        post: (pathspec, callback) => {
-
-            routeGen.routegeneration ? callToRegisterPath(pathspec) : res.end("Un-authorized")
+        post: async (pathspec, callback) => {
 
             if (req.method === "POST") {
 
-                // extractParams(pathname,pathspec)
                 req.params = paramParser(path, pathspec)
-                try {
-                    pathspec = typeof pathspec == 'object' ? pathspec : [pathspec]
-                    var pathname = matchPathname(path, pathspec)
-                } catch (err) {
-                    console.log(err)
-                }
+
+                var pathname;
+                //checks for matched path
+                ({ pathname, pathspec } = checkPath(pathspec));
 
                 var rawQuery = queryString.parse(urlOb.query)
 
@@ -148,26 +113,17 @@ function route(request, response, serverOption) {
                 invalidHttp(res)
             }
         },
-        all: (pathspec, callback) => {
+        all: async (pathspec, callback) => {
 
-            routeGen.routegeneration ? callToRegisterPath(pathspec) : res.end("Un-authorized")
-
-            // extractParams(pathname,pathspec)
             req.params = paramParser(path, pathspec)
-            try {
-                pathspec = typeof pathspec == 'object' ? pathspec : [pathspec]
-                var pathname = matchPathname(path, pathspec)
-            } catch (err) {
-                console.log(err)
-            }
+
+            var pathname;
+            //checks for matched path
+            ({ pathname, pathspec } = checkPath(pathspec));
 
             var rawQuery = queryString.parse(urlOb.query)
             var buffer = ""
             var body
-
-            if (pathname == "/generatePathMap") {
-                res.end("Path map generated successfully")
-            }
 
             serveStatic(load, pathspec, pathname);
 
@@ -182,28 +138,19 @@ function route(request, response, serverOption) {
                 await callCallBack(pathspec, pathname, callback, req, res)
             })
         },
-        put: (pathspec, callback) => {
-
-            routeGen.routegeneration ? callToRegisterPath(pathspec) : res.end("Un-authorized")
+        put: async (pathspec, callback) => {
 
             if (load.request.method == 'PUT') {
 
-                // extractParams(pathname,pathspec)
                 req.params = paramParser(path, pathspec)
-                try {
-                    pathspec = typeof pathspec == 'object' ? pathspec : [pathspec]
-                    var pathname = matchPathname(path, pathspec)
-                } catch (err) {
-                    console.log(err)
-                }
+
+                var pathname;
+                //checks for matched path
+                ({ pathname, pathspec } = checkPath(pathspec));
 
                 var rawQuery = queryString.parse(urlOb.query)
                 var buffer = ""
                 var body
-
-                if (pathname == "/generatePathMap") {
-                    res.end("Path map generated successfully")
-                }
 
                 serveStatic(load, pathspec, pathname);
 
@@ -223,26 +170,18 @@ function route(request, response, serverOption) {
         },
         patch: (pathspec, callback) => {
 
-            routeGen.routegeneration ? callToRegisterPath(pathspec) : res.end("Un-authorized")
-
             if (req.method == 'PATCH') {
-                // extractParams(pathname,pathspec)
+
                 req.params = paramParser(path, pathspec)
-                try {
-                    pathspec = typeof pathspec == 'object' ? pathspec : [pathspec]
-                    var pathname = matchPathname(path, pathspec)
-                } catch (err) {
-                    console.log(err)
-                }
+
+                var pathname;
+                //checks for matched path
+                ({ pathname, pathspec } = checkPath(pathspec));
 
                 var rawQuery = queryString.parse(urlOb.query)
                 // console.log(rawQuery)
                 var buffer = ""
                 var body
-
-                if (pathname == "/generatePathMap") {
-                    res.end("Path map generated successfully")
-                }
 
                 serveStatic(load, pathspec, pathname);
 
@@ -262,6 +201,22 @@ function route(request, response, serverOption) {
             }
         }
     }
+
+    function checkPath(pathspec) {
+        if (!urlConfig.paths.includes(path)) {
+            try {
+                pathspec = typeof pathspec == 'object' ? pathspec : [pathspec];
+                var pathname = matchPathname(path, pathspec);
+            }
+            catch (err) {
+                console.log(err);
+            }
+        }
+        else {
+            pathname = path;
+        }
+        return { pathname, pathspec };
+    }
 }
 
 async function callCallBack(pathspec, pathname, callback, req, res) {
@@ -273,7 +228,9 @@ async function callCallBack(pathspec, pathname, callback, req, res) {
                 await callback(null, req, res);
             }
             catch (err) {
-                await callback(err, req, res);
+                try {
+                    await callback(err, req, res);
+                } catch (err) { }
             }
         }
     }
@@ -282,7 +239,9 @@ async function callCallBack(pathspec, pathname, callback, req, res) {
             await callback(null, req, res);
         }
         catch (err) {
-            await callback(err, req, res);
+            try {
+                await callback(err, req, res);
+            } catch (error) { }
         }
     }
 }
@@ -306,8 +265,17 @@ let err404 = async (req, res) => {
     res.end(content)
 }
 
+function setServerOption(option) {
+    Object.assign(appOptions, option)
+}
+
+var setUrlConfigs = (configs) => {
+    urlConfig.paths = configs
+}
 //exporting the route, render, redirect, serveStatic method
 module.exports.render = render
+module.exports.setUrlConfigs = setUrlConfigs
+module.exports.setServerOption = setServerOption
 module.exports.redirect = redirect
 module.exports.serve = serveStatic
 module.exports.error = { "404": err404 }
