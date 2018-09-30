@@ -193,7 +193,20 @@ function mymiddleware(req,res){
   return [req,res]
 }
 ```
+
 Once you have created the middleware, declare it in a route or at an application level. Now, when you console log  `req.sayHello()`, "Hello" will be logged to the console.
+
+For a middleware with options :
+
+``` 
+function mymiddleware(option){
+  return (req,res)=>{
+    console.log(option)
+    return [req,res]
+  }
+}
+```
+
 
 ## Form handling
 
@@ -276,11 +289,12 @@ const app = Server({ "template_static" : "path/to/directory" })
 ```
 > Any static asset that needs to be used in the application should be put inside the `static` directory and the path should be registered in the `template_static` key and should be passed to the server method
 
-If you are using the ejs engine, you need to sepecify template_engine : "ejs" in the object passed to the render method:
+If you are going to use the ejs engine, you need to sepecify template_engine : "ejs" in the object passed to the render method or to the serverOptions:
 
 ```
-let user = await User.find(); /* fetching the data from the database */
-let content = await render({ "templateName": "index.ejs", "template_engine": "ejs", "data": { "data": user }, res: res })
+let title ="Welcome to laneJs"
+let content = await render({ "templateName": "index.ejs", "template_engine": "ejs", "data": { "title": title }})
+res.end(content)
 ```
 
 ```
@@ -291,72 +305,11 @@ let content = await render({ "templateName": "index.ejs", "template_engine": "ej
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <meta http-equiv="X-UA-Compatible" content="ie=edge">
-        <link rel="stylesheet" href="/bootstrap/bootstrap-3.3.7-dist/css/bootstrap.min.css">
-        <script type="application/javascript" src="/bootstrap/bootstrap-3.3.7-dist/js/bootstrap.min.js"></script>
-        <script type="application/javascript" src="/js/jquery/jquery-2.2.1.js"></script>
-        <title>Document</title>
+        <title><%=title%></title>
     </head>
 
     <body>
-        <div class="container">
-            <div class="row">
-                <div class="col-md-12">
-                    <h1>EJS render</h1>
-                    <form method="POST" action="/create">
-                        <div class="row">
-                            <div class="col-md-2">
-                                <input type="text" name="name" placeholder="name" class="form-control">
-                            </div>
-                            <div class="col-md-2">
-                                <input type="text" name="username" placeholder="username" class="form-control">
-                            </div>
-                            <div class="col-md-2">
-                                <input type="text" name="email" placeholder="email" class="form-control">
-                            </div>
-                            <div class="col-md-2">
-                                <input type="text" name="password" placeholder="password" class="form-control">
-                            </div>
-                            <div class="col-md-2">
-                                <input type="submit" value="add" class="btn btn-primary">
-                            </div>
-                        </div>
-                    </form>
-                </div>
-            </div>
-            <br>
-            <div class="row">
-                <div class="col-md-12">
-                    <table class="table table-striped">
-                        <tr>
-                            <th>name</th>
-                            <th>username</th>
-                            <th>email</th>
-                            <th>password</th>
-                            <th>action</th>
-                        </tr>
-                        <% data.forEach(function(user){%>
-                            <tr>
-                                <td>
-                                    <%= user.name %>
-                                </td>
-                                <td>
-                                    <%= user.username %>
-                                </td>
-                                <td>
-                                    <%= user.email %>
-                                </td>
-                                <td>
-                                    <%= user.password %>
-                                </td>
-                                <td>
-                                    <a href=/delete?id=<%= user._id %>>delete</a>
-                                </td>
-                            </tr>
-                            <% }) %>
-                    </table>
-                </div>
-            </div>
-        </div>
+        <h1><%=title%></h1>
     </body>
 
     </html>

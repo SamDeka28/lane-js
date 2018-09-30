@@ -35,135 +35,33 @@ function route(request, response, options) {
         // and the callback handler for the route
         //
         get: async (pathspec, callback) => {
-
             // checks if the HTTP method is GET
             if (req.method == "GET") {
-
-                req.params = paramParser(path, pathspec)
-
-                var pathname;
-                //checks for matched path
-                ({ pathname, pathspec } = checkPath(pathspec));
-                //parse the queryString if any
-                let rawQuery = queryString.parse(urlOb.query)
-
-                rawQuery ? req.query = rawQuery : null
-
-                // serves the statics associated with a html file, such as bootstrap, jquery etc
-                serveStatic(load, pathspec, pathname)
-
-                // checks for the type of the specified path, if the specified path is of Object type,
-                // then it checks if the pathname is included in the pathname, and call the callback else
-                // simply calls the callback function specified in the route
-                await callCallBack(pathspec, pathname, callback, req, res);
+                methodHandler(pathspec, callback);
             } else {
                 invalidHttp(res);
             }
         },
         delete: async (pathspec, callback) => {
-
-            req.params = paramParser(path, pathspec)
-
-            var pathname;
-            //checks for matched path
-            ({ pathname, pathspec } = checkPath(pathspec));
-
             if (req.method == "DELETE") {
-
-                let rawQuery = queryString.parse(urlOb.query)
-
-                rawQuery ? req.query = rawQuery : null
-
-                serveStatic(load, pathspec, pathname)
-
-                await callCallBack(pathspec, pathname, callback, req, res);
+                methodHandler(pathspec, callback);
             } else {
                 invalidHttp(res);
             }
         },
         post: async (pathspec, callback) => {
-
             if (req.method === "POST") {
-
-                req.params = paramParser(path, pathspec)
-
-                var pathname;
-                //checks for matched path
-                ({ pathname, pathspec } = checkPath(pathspec));
-
-                var rawQuery = queryString.parse(urlOb.query)
-
-                // declared an empty buffer
-                var buffer = ""
-                var body = {}
-
-                // utilizing the on data event for creating the data from the posted data buffer
-                req.on('data', function (data) {
-                    buffer += data.toString()
-                })
-
-                req.on("end", async function () {
-                    // on successfull extraction of the post data, the body is parsed and stored in the body object
-                    body = queryString.parse(buffer)
-                    rawQuery ? req.query = rawQuery : null
-                    body ? req.body = body : null
-                    await callCallBack(pathspec, pathname, callback, req, res);
-                })
+                methodHandler(pathspec, callback);
             } else {
                 invalidHttp(res)
             }
         },
         all: async (pathspec, callback) => {
-
-            req.params = paramParser(path, pathspec)
-
-            var pathname;
-            //checks for matched path
-            ({ pathname, pathspec } = checkPath(pathspec));
-
-            var rawQuery = queryString.parse(urlOb.query)
-            var buffer = ""
-            var body
-
-            serveStatic(load, pathspec, pathname);
-
-            req.on('data', function (data) {
-                buffer += data.toString()
-            })
-
-            req.on("end", async function () {
-                body = queryString.parse(buffer)
-                rawQuery ? req.query = rawQuery : null
-                body ? req.body = body : null
-                await callCallBack(pathspec, pathname, callback, req, res)
-            })
+            methodHandler(pathspec, callback);
         },
         put: async (pathspec, callback) => {
-
             if (load.request.method == 'PUT') {
-
-                req.params = paramParser(path, pathspec)
-
-                var pathname;
-                //checks for matched path
-                ({ pathname, pathspec } = checkPath(pathspec));
-
-                var rawQuery = queryString.parse(urlOb.query)
-                var buffer = ""
-                var body
-
-                serveStatic(load, pathspec, pathname);
-
-                req.on('data', function (data) {
-                    buffer += data.toString()
-                })
-
-                req.on("end", async function () {
-                    body = queryString.parse(buffer)
-                    rawQuery ? req.query = rawQuery : null
-                    body ? req.body = body : null
-                    await callCallBack(pathspec, pathname, callback, req, res);
-                })
+                methodHandler(pathspec, callback);
             } else {
                 invalidHttp(res)
             }
@@ -171,35 +69,59 @@ function route(request, response, options) {
         patch: (pathspec, callback) => {
 
             if (req.method == 'PATCH') {
-
-                req.params = paramParser(path, pathspec)
-
-                var pathname;
-                //checks for matched path
-                ({ pathname, pathspec } = checkPath(pathspec));
-
-                var rawQuery = queryString.parse(urlOb.query)
-                // console.log(rawQuery)
-                var buffer = ""
-                var body
-
-                serveStatic(load, pathspec, pathname);
-
-
-                req.on('data', function (data) {
-                    buffer += data.toString()
-                })
-
-                req.on("end", async function () {
-                    body = queryString.parse(buffer)
-                    rawQuery ? req.query = rawQuery : null
-                    body ? req.body = body : null
-                    await callCallBack(pathspec, pathname, callback, req, res);
-                })
+                methodHandler(pathspec, callback);
             } else {
                 invalidHttp(res)
             }
         }
+    }
+
+    function methodHandler(pathspec, callback) {
+        req.params = paramParser(path, pathspec);
+        var pathname;
+        //checks for matched path
+        ({ pathname, pathspec } = checkPath(pathspec));
+        var rawQuery = queryString.parse(urlOb.query);
+        // declared an empty buffer
+        var buffer = "";
+        var body = {};
+        // serveStatic(load, pathspec, pathname);
+        // utilizing the on data event for creating the data from the posted data buffer
+        req.on('data', function (data) {
+            buffer += data.toString();
+        });
+        req.on("end", async function () {
+            // on successfull extraction of the post data, the body is parsed and stored in the body object
+            body = queryString.parse(buffer);
+            rawQuery ? req.query = rawQuery : null;
+            body ? req.body = body : null;
+            if (typeof (pathspec) == 'object') {
+                if (pathspec.includes(pathname)) {
+                    try {
+                        // the call back has three arguments, the req and res object and a object that contains
+                        // the parsed query string object the is exposed throught the get key
+                        await callback(null, req, res);
+                    }
+                    catch (err) {
+                        try {
+                            await callback(err, req, res);
+                        } catch (err) {
+                            console.log(err)
+                        }
+                    }
+                }
+            }
+            else if (pathspec == pathname) {
+                try {
+                    await callback(null, req, res);
+                }
+                catch (err) {
+                    try {
+                        await callback(err, req, res);
+                    } catch (error) { }
+                }
+            }
+        });
     }
 
     function checkPath(pathspec) {
@@ -219,34 +141,39 @@ function route(request, response, options) {
     }
 }
 
-async function callCallBack(pathspec, pathname, callback, req, res) {
-    if (typeof (pathspec) == 'object') {
-        if (pathspec.includes(pathname)) {
-            try {
-                // the call back has three arguments, the req and res object and a object that contains
-                // the parsed query string object the is exposed throught the get key
-                await callback(null, req, res);
-            }
-            catch (err) {
-                try {
-                    await callback(err, req, res);
-                } catch (err) { }
-            }
-        }
-    }
-    else if (pathspec == pathname) {
-        try {
-            await callback(null, req, res);
-        }
-        catch (err) {
-            try {
-                await callback(err, req, res);
-            } catch (error) { }
-        }
-    }
-}
+// async function callCallBack(pathspec, pathname, callback, req, res) {
+//     if (typeof (pathspec) == 'object') {
+//         console.log("pathspecified is an object")
+//         if (pathspec.includes(pathname)) {
+//             try {
+//                 // the call back has three arguments, the req and res object and a object that contains
+//                 // the parsed query string object the is exposed throught the get key
+//                 await callback(null, req, res);
+//             }
+//             catch (err) {
+//                 try {
+//                     await callback(err, req, res);
+//                 } catch (err) {
+//                     console.log(err)
+//                 }
+//             }
+//         }
+//     }
+//     else if (pathspec == pathname) {
+//         console.log("path specified is a string")
+//         try {
+//             await callback(null, req, res);
+//         }
+//         catch (err) {
+//             try {
+//                 await callback(err, req, res);
+//             } catch (error) { }
+//         }
+//     }
+// }
 
 function invalidHttp(res) {
+    res.writeHead(400)
     err = { status: 400, message: "400 Bad Request" };
     res.end(JSON.stringify(err));
 }
@@ -261,6 +188,7 @@ var redirect = (loc, res) => {
 
 // renders a 404 html template
 let err404 = async (req, res) => {
+    res.writeHead(404)
     let content = await ejsrender(__dirname + "/statics/error/404.html", { req: req, res: res, data: { name: "Error :::: 404 Page not found" } })
     res.end(content)
 }

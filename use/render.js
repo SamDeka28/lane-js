@@ -11,16 +11,13 @@ const ejs = require("ejs")
 //             data : String (when template engine is ejs)
 //             res : Object (server response object)
 // ** the function is to be replaced by third party templating engine in the future
-const serverOption = {}
+var serverOption = {}
 var render = async (options) => {
-
     var templateDir = ""
-
     options.template_directory == "" || options.template_directory == undefined ? templateDir = serverOption.template_directory : templateDir = options.template_directory
 
     var templatePath = path.join(templateDir, options.templateName)
-
-    if (options.template_engine == undefined) {
+    if (options.template_engine == undefined && serverOption.template_engine != "ejs") {
         try {
             var loaded = (readFile(templatePath)).toString()
             let content = ""
@@ -38,7 +35,6 @@ var render = async (options) => {
     } else if (options.template_engine == "ejs" || serverOption.template_engine == "ejs") {
         return await ejsrender(templatePath, options)
     }
-
 }
 
 const ejsrender = async (templatePath, options) => {
@@ -47,7 +43,7 @@ const ejsrender = async (templatePath, options) => {
 }
 
 module.exports.rendererOptions = function (options) {
-    Object.assign(serverOption, options)
+    serverOption = options
 }
 module.exports.render = render
 module.exports.ejsrender = ejsrender

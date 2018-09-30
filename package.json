@@ -2,7 +2,7 @@
   "author": {
     "name": "Samudra Deka"
   },
-  "description": "A lightweight REST ()\u001b[Drouting) framework for node",
+  "description": "A lightweight routing solution for node",
   "keywords": [
     "laneJs",
     "framework",
@@ -22,7 +22,7 @@
     "type": "git",
     "url": "https://github.com/SamDeka28/lane-js"
   },
-  "version": "1.0.4",
+  "version": "1.0.5",
   "dependencies": {
     "ejs": "^2.6.1"
   }
