@@ -1,6 +1,5 @@
 
 module.exports = function paramParser(pathname, pathspec) {
-  let params = {}
   if (typeof pathspec == "object") {
     pathspec.forEach(spec => {
       params = extractor(pathname, spec)
@@ -12,17 +11,16 @@ module.exports = function paramParser(pathname, pathspec) {
 }
 
 function extractor(pathname, pathspec) {
-  let path = []
-  let newPathname = []
   let params = {}
-  path = pathspec.split("/")
-  path.forEach((iPath, index) => {
-    if (pathspec.indexOf(":") > -1) {
-      if (iPath.indexOf(":") > -1) {
-        newPathname = pathname.split("/")
-        params[`${path[index].replace(":", '')}`] = newPathname[index]
-      }
+  let pathnameSplited = pathname.split("/")
+  let pathspecSplited = pathspec.split("/")
+  let pathnamelength = pathnameSplited.length
+  let pathspeclength = pathspecSplited.length
+  let diff = pathnamelength - pathspeclength
+  for (let i = pathspeclength - 1; i != 0; i--) {
+    if (pathspecSplited[i].indexOf(":") > -1) {
+      params[pathspecSplited[i].replace(":", '')] = pathnameSplited[diff + i]
     }
-  })
+  }
   return params
 }

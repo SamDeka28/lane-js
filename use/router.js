@@ -85,7 +85,6 @@ function route(request, response, options) {
         // declared an empty buffer
         var buffer = "";
         var body = {};
-        // serveStatic(load, pathspec, pathname);
         // utilizing the on data event for creating the data from the posted data buffer
         req.on('data', function (data) {
             buffer += data.toString();
@@ -93,32 +92,19 @@ function route(request, response, options) {
         req.on("end", async function () {
             // on successfull extraction of the post data, the body is parsed and stored in the body object
             body = queryString.parse(buffer);
-            rawQuery ? req.query = rawQuery : null;
-            body ? req.body = body : null;
-            if (typeof (pathspec) == 'object') {
-                if (pathspec.includes(pathname)) {
-                    try {
-                        // the call back has three arguments, the req and res object and a object that contains
-                        // the parsed query string object the is exposed throught the get key
-                        await callback(null, req, res);
-                    }
-                    catch (err) {
-                        try {
-                            await callback(err, req, res);
-                        } catch (err) {
-                            console.log(err)
-                        }
-                    }
-                }
+            req.query = rawQuery ? rawQuery : {};
+            req.body = body ? body : {};
+
+            try {
+                // the call back has three arguments, the req and res object and a object that contains
+                // the parsed query string object the is exposed throught the get key
+                await callback(null, req, res);
             }
-            else if (pathspec == pathname) {
+            catch (err) {
                 try {
-                    await callback(null, req, res);
-                }
-                catch (err) {
-                    try {
-                        await callback(err, req, res);
-                    } catch (error) { }
+                    await callback(err, req, res);
+                } catch (err) {
+                    console.log(err)
                 }
             }
         });
@@ -140,37 +126,6 @@ function route(request, response, options) {
         return { pathname, pathspec };
     }
 }
-
-// async function callCallBack(pathspec, pathname, callback, req, res) {
-//     if (typeof (pathspec) == 'object') {
-//         console.log("pathspecified is an object")
-//         if (pathspec.includes(pathname)) {
-//             try {
-//                 // the call back has three arguments, the req and res object and a object that contains
-//                 // the parsed query string object the is exposed throught the get key
-//                 await callback(null, req, res);
-//             }
-//             catch (err) {
-//                 try {
-//                     await callback(err, req, res);
-//                 } catch (err) {
-//                     console.log(err)
-//                 }
-//             }
-//         }
-//     }
-//     else if (pathspec == pathname) {
-//         console.log("path specified is a string")
-//         try {
-//             await callback(null, req, res);
-//         }
-//         catch (err) {
-//             try {
-//                 await callback(err, req, res);
-//             } catch (error) { }
-//         }
-//     }
-// }
 
 function invalidHttp(res) {
     res.writeHead(400)

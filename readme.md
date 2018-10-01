@@ -29,11 +29,12 @@ npm install lane-js --save
 - Multipath routes
 
 ### CHANGELOGS
+- Added namespaces in urlConfigs
 - Added `pathify` for modular dependency of urlConfigs
 - Removed Route generation
 - Removed dependency of configs/config.json and configs/paths.map.json
 
-> From this version, /generatePathMap has been disabled. There is no need of registering a route. A route is automatically registered and made available for use once it is defined in the urlConfig/index.js
+> From this version, /generatePathMap has been disabled. There is no need of registering a route. A route is automatically registered and made available for use once it is defined in the urlConfig
 
 ## A Quick guide to start with LaneJs
 To quickly get started with LaneJs, go to  [https://github.com/SamDeka28/lanify](https://github.com/SamDeka28/lanify) and clone the repo.
@@ -46,6 +47,7 @@ To create a LaneJs application, create a directory structure identical to the st
 yourappname
     --urlConfig
       --index.js
+    --views
     --app.js
 ```
 > It is not mandatory to create the same directory structure. You can structure your application the way you want. The only neccessary file here is the app.js (you can name it whatever you like) for initializing the server
@@ -68,9 +70,18 @@ This will install LaneJs as your project dependency
 Open your app.js file and paste in the following code to create the LaneJs server : 
 
 ```
-const urlConfig = require("./urlConfig")
-
 const Server = require("lane-js")
+const { route } = require("lane-js/use/router")
+
+const urlConfig = {
+    "paths": {
+        "/" : (req,res)=>{
+            route(req,res).get("/",(err,req,res)=>{
+                res.end("Welcome to LaneJs")
+            })
+        }
+    }
+}
 
 const app = Server({ urls : urlConfig })
 
@@ -80,7 +91,7 @@ app.listen(3000, "127.0.0.1", () => console.log("Server is up and running at por
 Thats all for creating the server
 
 ## Server Options
-- **middlewares** : middlewares takes in an array of middleware function that can transform the request an response object before it reaches the route handler.
+- **middlewares** : middlewares takes in an array of middleware function that can transform the request and the response object before it reaches the route handler.
 ```
 const app = Server({ middlewares : [
     function lane(req, res) {
@@ -90,7 +101,7 @@ const app = Server({ middlewares : [
 ] })
 ```
 
-- **urls** : this is the urlConfig, that contains a `paths` key which is an object of routes defined for the application
+- **urls** : this take a urlConfig object, that contains a `paths` key which is an object of routes defined for the application
 ```
 let urlConfig = {
     "paths": {
@@ -107,13 +118,102 @@ const app = Server({ template_directory: "views" })
 ```
 const app = Server({ template_static: "views/static" })
 ```
-- **template_engine** : the template engine that you are using, currently we only support ejs for rendering views.
+- **template_engine** : the template engine that you are using, LaneJs supports ejs for rendering views.
 ```
 const app = Server({ template_engine: "ejs" })
 ```
 
+## UrlConfig
+The urlConfig is an object where we define the `pathnames` for the routes we create in our application. This object should be passed in the `urls` key in the serverOptions object.  It has two keys :
+
+- `paths` : this object contains key-value pair for our routes; the `key` being the pathname and the `value` being the route function that we create. For example.
+```
+const urlConfig = {
+  "paths" : {
+      "/": require("/path/to/route")
+  }
+}
+```
+- `namespace`: The `namespace` is a key that when defined, prepends to each `pathname` defined in the `paths` object of the urlConfig. This option can only be used with `pathify`. A simple example of using urlConfig using namespace is given below:
+
+`urlConfig`
+```
+let { route } = require("lane-js/use/router")
+
+let urlConfig = {
+  'namespace': "users",
+  'paths': {
+    "/index": (req, res) => {
+      route(req, res).get("/index", (err, req, res) => {
+        res.end("Welcome to LaneJs")
+      })
+    }
+  }
+}
+
+module.exports = urlConfig
+```
+
+In `app.js` : 
+
+```
+const Lane = require("lane-js")
+const { pathify } = require("lane-js/use/pathify")
+
+let urls = pathify(require("./urlConfig"))
+
+const serverOptions = {
+  urls: urls,
+  template_directory: "views",
+  template_static: "views",
+  template_engine: "ejs"
+}
+
+let app = Lane(serverOptions)
+
+app.listen(3000, () => console.log('Server is up and running at 3000'))
+```
+Now you can access `/index` route that you have created from http://localhost:3000/users/index
+
+## Pathify :
+
+`Pathify` is module that is used to combine `urlConfigs` of different modules in your application into one single urlConfig that can be passed to the `urls` option in the serverOptions
+
+For example :
+```
+const Lane = require("lane-js")
+const { pathify } = require("lane-js/use/pathify")
+
+let user = {
+    namespace : 'user',
+    paths : {
+        "/create" : require(path/to/route)
+    }
+}
+
+let login = {
+    paths : {
+        "/login" : require(path/to/route)
+    }
+}
+
+let urls = pathify(login,user)
+
+const serverOptions = {
+  urls: urls,
+  template_directory: "views",
+  template_static: "views",
+  template_engine: "ejs"
+}
+
+let app = Lane(serverOptions)
+
+app.listen(3000, () => console.log('Server is up and running at 3000'))
+```
+
 
 ## Routing
+
 Creating a basic route in LaneJs involves requiring the `route` method from the router module of LaneJs
 ```
 const { route } = require("lane-js/use/router")
@@ -207,6 +307,7 @@ function mymiddleware(option){
 }
 ```
 
+> Any express module can be used with lane-js with slight modifications to the modules by replacing all the `next()` function with `return [req,res]` and removing the `next` argument from any function that might be passing it
 
 ## Form handling
 

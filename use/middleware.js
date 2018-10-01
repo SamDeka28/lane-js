@@ -6,7 +6,6 @@ module.exports = function transformRequestResponse(serverOption, request, respon
   let middleware
   if (serverOption && serverOption['middlewares']) {
     if (serverOption.middlewares.length) {
-
       for (let ini = 0; ini < serverOption.middlewares.length; ini++) {
         try {
           middleware = new Promise((resolve) => {
