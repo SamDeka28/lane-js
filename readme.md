@@ -1,6 +1,6 @@
 
 # LaneJs - A REST and ROUTING solution for node
-[![npm version](https://badge.fury.io/js/lane-js.svg)](https://badge.fury.io/js/lane-js)  [![Known Vulnerabilities](https://snyk.io/test/github/SamDeka28/lane-js/badge.svg)](https://snyk.io/test/github/SamDeka28/lane-js)  ![npm](https://img.shields.io/npm/dt/lane-js.svg) ![NpmLicense](https://img.shields.io/npm/l/lane-js.svg?registry_uri=https%3A%2F%2Fregistry.npmjs.com)
+[![npm version](https://badge.fury.io/js/lane-js.svg)](https://www.npmjs.com/package/lane-js)  [![Known Vulnerabilities](https://snyk.io/test/github/SamDeka28/lane-js/badge.svg)](https://snyk.io/test/github/SamDeka28/lane-js)  [![npm](https://img.shields.io/npm/dt/lane-js.svg)](https://www.npmjs.com/package/lane-js) [![NpmLicense](https://img.shields.io/npm/l/lane-js.svg?registry_uri=https%3A%2F%2Fregistry.npmjs.com)](https://www.npmjs.com/package/lane-js)
 
 LaneJs is a lightweight routing solution for [Node.Js](https://nodejs.org)
 
