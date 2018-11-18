@@ -1,49 +1,65 @@
-const fs = require('fs')
-const readFile = fs.readFileSync
-const path = require("path")
-const ejs = require("ejs")
-// Function : render(options : JSON) 
-// #parameters : template_directory : optional (if not specified defaults to templates directory inside app root)
-//             templateName : String (required)
-//             page_title : String
-//             page_content : String
-//             template_engine : String
-//             data : String (when template engine is ejs)
-//             res : Object (server response object)
-// ** the function is to be replaced by third party templating engine in the future
 var serverOption = {}
-var render = async (options) => {
-    var templateDir = ""
-    options.template_directory == "" || options.template_directory == undefined ? templateDir = serverOption.template_directory : templateDir = options.template_directory
-
-    var templatePath = path.join(templateDir, options.templateName)
-    if (options.template_engine == undefined && serverOption.template_engine != "ejs") {
-        try {
-            var loaded = (readFile(templatePath)).toString()
-            let content = ""
-            if (options.replacable) {
-                for (const chunks in options.replacable) {
-                    let toReplace = `~(${chunks})`
-                    content = loaded.replace(toReplace, options.replacable[chunks])
-                    loaded = content
-                }
-            }
-            return loaded
-        } catch (err) {
-            console.log(err)
+const fs = require('fs')
+const ejs = require("ejs")
+const path = require("path")
+const pug = require("pug")
+const hbs = require("handlebars")
+var render = async (res, templateName, contextData) => {
+    let templateDir = serverOption.template_directory
+    let templatePath = path.join(templateDir, templateName)
+    let renderable
+    if (serverOption.template_engine == "ejs" || serverOption.template_engine == "ejs") {
+        if (contextData) {
+            renderable = ejs.renderFile(templatePath, contextData);
+        } else {
+            renderable = ejs.renderFile(templatePath);
         }
-    } else if (options.template_engine == "ejs" || serverOption.template_engine == "ejs") {
-        return await ejsrender(templatePath, options)
+    } else if (serverOption.template_engine == "hbs") {
+        let content = fs.readFileSync(templatePath)
+        let template = hbs.compile(content.toString());
+        renderable = template(contextData);
+    } else if (serverOption.template_engine == "pug") {
+        renderable = pug.renderFile(templatePath, contextData);
     }
+    res.end(await renderable)
 }
 
-const ejsrender = async (templatePath, options) => {
-    var ejsrenderer = await ejs.renderFile(templatePath, options.data);
-    return ejsrenderer;
+const ejsrender = (templatePath, contextData) => {
+    let renderable
+    if (contextData) {
+        renderable = ejs.renderFile(templatePath, contextData);
+    } else {
+        renderable = ejs.renderFile(templatePath);
+    }
+    return renderable
 }
 
 module.exports.rendererOptions = function (options) {
     serverOption = options
 }
+
+function invalidHttp(res) {
+    res.writeHead(400)
+    err = { status: 400, message: "400 Bad Request" };
+    res.end(JSON.stringify(err));
+}
+
+// Function Redirect :
+// Performs a http redirect
+// Requires 2 parameters , the redirection location and the server response object
+var redirect = (res, loc) => {
+    res.writeHead(302, { Location: loc })
+    res.end()
+}
+
+// renders a 404 html template
+let err404 = async (req, res) => {
+    res.writeHead(404)
+    let content = await ejsrender(__dirname + "/statics/error/404.html", { name: "Error :::: 404 Page not found" })
+    res.end(content)
+}
+module.exports.redirect = redirect
+module.exports.invalidHttp = invalidHttp
+module.exports.error = { "404": err404 }
 module.exports.render = render
 module.exports.ejsrender = ejsrender

@@ -22,8 +22,10 @@
     "type": "git",
     "url": "https://github.com/SamDeka28/lane-js"
   },
-  "version": "1.0.6",
+  "version": "1.0.7",
   "dependencies": {
-    "ejs": "^2.6.1"
+    "ejs": "^2.6.1",
+    "hbs": "^4.0.1",
+    "pug": "^2.0.3"
   }
 }

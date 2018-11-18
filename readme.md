@@ -7,10 +7,15 @@ LaneJs is a lightweight routing solution for [Node.Js](https://nodejs.org)
 A basic route in LaneJs looks like this : 
 ```
 const { route }= require('lane-js/use/router');
-module.export = (req,res) => {
-  route(req,res).get('/index',function(err,req,res){
-      res.end('Hello World')
-  })
+module.export = {
+  'paths': {
+        "/": {
+            method: 'GET',
+            handler: (req, res) => {
+                res.end("Hello")
+            }
+        }
+    }
 }
 ```
 
@@ -23,21 +28,15 @@ npm install lane-js --save
 ### Features 
 - Fast Routing
 - Middleware Support
+- Templating (Embedded Javascript, Handlebars and pug)
 - Improved Performance 
 - Body parsing support
 - Param parsing support
-- Multipath routes
+- Namespacing
 
-### CHANGELOGS
-- Added namespaces in urlConfigs
-- Added `pathify` for modular dependency of urlConfigs
-- Removed Route generation
-- Removed dependency of configs/config.json and configs/paths.map.json
-
-> From this version, /generatePathMap has been disabled. There is no need of registering a route. A route is automatically registered and made available for use once it is defined in the urlConfig
 
 ## A Quick guide to start with LaneJs
-To quickly get started with LaneJs, go to  [https://github.com/SamDeka28/lanify](https://github.com/SamDeka28/lanify) and clone the repo.
+To quickly get started with LaneJs, go to  [https://github.com/SamDeka28/lanify07](https://github.com/SamDeka28/lanify07) and clone the repo.
 
 Once you have cloned the repo, follow the instructions given in the readme.md of the repository
 
@@ -70,20 +69,20 @@ This will install LaneJs as your project dependency
 Open your app.js file and paste in the following code to create the LaneJs server : 
 
 ```
-const Server = require("lane-js")
-const { route } = require("lane-js/use/router")
+const LaneJs = require("lane-js")
 
-const urlConfig = {
-    "paths": {
-        "/" : (req,res)=>{
-            route(req,res).get("/",(err,req,res)=>{
-                res.end("Welcome to LaneJs")
-            })
+let urlConfig = {
+  'paths': {
+        "/": {
+            method: 'GET',
+            handler: (req, res) => {
+                res.end("Hello")
+            }
         }
     }
 }
 
-const app = Server({ urls : urlConfig })
+const app = LaneJs.Server({ urls : urlConfig })
 
 app.listen(3000, "127.0.0.1", () => console.log("Server is up and running at port 3000"))
 ```
@@ -93,7 +92,7 @@ Thats all for creating the server
 ## Server Options
 - **middlewares** : middlewares takes in an array of middleware function that can transform the request and the response object before it reaches the route handler.
 ```
-const app = Server({ middlewares : [
+const app = LaneJs.Server({ middlewares : [
     function lane(req, res) {
         console.log("hello")
         return [req, res]
@@ -101,36 +100,45 @@ const app = Server({ middlewares : [
 ] })
 ```
 
-- **urls** : this take a urlConfig object, that contains a `paths` key which is an object of routes defined for the application
+- **urls** : this take a urlConfig object, that contains a `paths` key which is an object of routes defined for the application. Each path in the `paths` object is an object that should have two required keys - method, handler
 ```
 let urlConfig = {
     "paths": {
-        "/": require("path/to/route"),
+        "/": {
+          method : 'GET',
+          handler : require("/path/to/route")
+      }
     }
 }
-const app = Server({ urls : urlConfig })
+const app = Lane.Server({ urls : urlConfig })
 ```
 - **template_directory** : the relative path for the directory that contains your static html or ejs files
 ```
-const app = Server({ template_directory: "views" })
+const app = Lane.Server({ template_directory: "views" })
 ```
 - **template_static** : the relative path for the directory that contains you static assets such as boostrap files, jquery files, images etc
 ```
-const app = Server({ template_static: "views/static" })
+const app = Lane.Server({ template_static: "views/static" })
 ```
 - **template_engine** : the template engine that you are using, LaneJs supports ejs for rendering views.
 ```
-const app = Server({ template_engine: "ejs" })
+const app = Lane.Server({ template_engine: "ejs" })
 ```
 
 ## UrlConfig
 The urlConfig is an object where we define the `pathnames` for the routes we create in our application. This object should be passed in the `urls` key in the serverOptions object.  It has two keys :
 
-- `paths` : this object contains key-value pair for our routes; the `key` being the pathname and the `value` being the route function that we create. For example.
+- `paths` : this object contains key-value pair for our routes; the `key` being the pathname and the `value` being an object where we can define our `method`,`handler` and `middlewares` (`middlewares` is optional). The method is the `http` verb (GET, POST, PUT etc),the `handler` is the route handler function which takes two parameters `req` and `res` and the `middlewares` is an array of middleware functions. For example.
 ```
 const urlConfig = {
   "paths" : {
-      "/": require("/path/to/route")
+      "/": {
+        method : 'GET',
+        middlewares : [sayhi] //assuming that sayhi is a middleware function
+        handler : ( req, res) => {
+          res.end("Hello World")
+        }
+      }
   }
 }
 ```
@@ -138,15 +146,14 @@ const urlConfig = {
 
 `urlConfig`
 ```
-let { route } = require("lane-js/use/router")
-
 let urlConfig = {
   'namespace': "users",
   'paths': {
-    "/index": (req, res) => {
-      route(req, res).get("/index", (err, req, res) => {
+    "/index": {
+      method : 'GET',
+      handler: (req, res) => {
         res.end("Welcome to LaneJs")
-      })
+      }
     }
   }
 }
@@ -169,7 +176,7 @@ const serverOptions = {
   template_engine: "ejs"
 }
 
-let app = Lane(serverOptions)
+let app = Lane.Server(serverOptions)
 
 app.listen(3000, () => console.log('Server is up and running at 3000'))
 ```
@@ -187,13 +194,19 @@ const { pathify } = require("lane-js/use/pathify")
 let user = {
     namespace : 'user',
     paths : {
-        "/create" : require(path/to/route)
+        "/create" : {
+          method : 'POST',
+          handler : require(path/to/route)
+        }
     }
 }
 
 let login = {
     paths : {
-        "/login" : require(path/to/route)
+        "/login" : {
+          method : 'GET',
+          handler : require(path/to/route)
+        }
     }
 }
 
@@ -206,7 +219,7 @@ const serverOptions = {
   template_engine: "ejs"
 }
 
-let app = Lane(serverOptions)
+let app = Lane.Server(serverOptions)
 
 app.listen(3000, () => console.log('Server is up and running at 3000'))
 ```
@@ -214,21 +227,18 @@ app.listen(3000, () => console.log('Server is up and running at 3000'))
 
 ## Routing
 
-Creating a basic route in LaneJs involves requiring the `route` method from the router module of LaneJs
+Creating a basic route in LaneJs :
 ```
-const { route } = require("lane-js/use/router")
-
-module.export = (req,res)=>{
-  route( req, res).get( '/', function( err, req, res)=>{
-    req.end("Welcome to LaneJs")
-  })
+module.export.index = (req,res) => {
+    res.end("Welcome to LaneJs)
 }
 ```
 Once the route is created, you need to declare it in the *urlConfig*. Move to the urlConfig folder and open index.js. Declare the created route as : 
 ```
+let { index } = require("/path/to/route")
 const urlConfig = {
   "paths" : {
-      "/": require("/path/to/route")
+      "/": { method : 'GET', handler : index }
   }
 }
 
@@ -237,24 +247,26 @@ module.exports = urlConfig
 
 Once you have declared the route in the urlConfig, start the server `node app.js`. You can now use the route that you have created.
 
-> Ensure that you have required the urlConfig in the app.js file and passed it to the server method as : `const app = Server({ urls : urlConfig })`
+> Ensure that you have required the urlConfig in the app.js file and passed it to the server method as : `const app = LaneJs.Server({ urls : urlConfig })`
 
 ### Path Params
 
 A basic example of defining path params is shown below:
 ```
-const { route } = require("lane-js/use/router")
-
-module.export = (req,res)=>{
-  route( req, res).get( '/user/:id', function( err, req, res)=>{
-    req.end("Welcome to LaneJs")
-  })
+let urlConfig ={
+  paths : {
+    "/user/:id" : { 
+      method : 'GET',
+      handler : ( req, res ) => {
+        let id = req.params.id
+        res.end(id)
+      }
+    } 
+  }
 }
 ``` 
 
 The params can be accessed in a route using `req.params`
-
-> You need to define the exact path in the urlConfig to make it available for use 
 
 > You can define multiple params in a path. eg : '/user/:id/name/:name'.
 
@@ -272,13 +284,21 @@ To use a application level middleware, you need to declare in the app.js file wh
 > the 'middlewares' is an array of middleware function. The middlewares will be executed in the sequence they are defined
 
 ```
-var app = Server({ middlewares : [] })
+let Lane = require("lane-js")
+var app = Lane.Server({ middlewares : [] })
 ```
 
-- **Route level** : Route level middlewares are available for the route where it is declared. To use middlewares in a route, pass a third parameter in the route() function as an object that contains the middlewares array
+- **Route level** : Route level middlewares are available for the route where it is declared. To use middlewares in a route, declare the `middlewares` key with an array of middlewares
 
 ``` 
-route( req, res, { middlewares : [] }).get("/", handler)
+"/user/:id" : { 
+      method : 'GET',
+      middlewares : [sayhi],
+      handler : ( req, res ) => {
+        let id = req.params.id
+        res.end(id)
+      }
+    } 
 ```
 
 ### Creating your own middleware in LaneJs
@@ -315,106 +335,83 @@ LaneJs, by default, can handle `x-www-from-urlencoded` data while using the post
 
 ## Redirection
 
-To redirect to another path from a handler, we need to import the **redirect** object from the router module as :
+To redirect to another path from a handler, we need to import  **redirect**  from `lane-js` as :
 ```
-var { redirect } = require("lane-js/use/router")
+var { redirect } = require("lane-js")
 ```
 
 The syntax for redirection is fairly simple
 ```
-redirect(pathname : String, res : ServerResponse)
+redirect(res,location)
 ```
 Example : 
 ```
-redirect("https://www.google.com",res)
+redirect(res,"https://www.google.com")
+```
+or
+```
+redirect(res,"/")
 ```
 
-## Rendering : 
+## Templating : 
 
-`var { render } = require("lane-js/use/router")`
+LaneJs supports three templating engines -
+- ejs
+- hbs (handlebars)
+- pug
 
-The render method of LaneJs provide two kind of rendering:
-- Inbuilt String interpolated Redering and 
-- EJs rendering
+To use any of these engines, you need to specify the `template_engine` in the serverOptions as:
 
-To use the Inbuilt String interpolated Redering capabilty for simple render, pass in an object of replacables : 
+- For ejs :
 ```
-    let content = {
-            'page-title':"trajectory.io",
-            'page-content':"welcome to the first LaneJs application",
-            'application' : 'Lane<span style="color: tomato">Js</span>'
-        }
-
-    var renderable = await render({ "templateName": "index.html", replacable : content });
+var app = LaneJs.Server({ template_engine : 'ejs' })
 ```
 
-And in the html :
+- For Handlebars (hbs) :
 ```
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <meta http-equiv="X-UA-Compatible" content="ie=edge">
-        <link rel="stylesheet" href="/bootstrap/bootstrap-3.3.7-dist/css/bootstrap.min.css">
-        <script type="application/javascript" src="/bootstrap/bootstrap-3.3.7-dist/js/bootstrap.min.js"></script>
-        <script type="application/javascript" src="/js/jquery/jquery-2.2.1.js"></script>
-        <title>~(page-title)</title>
-        <style>
-            .holder-vh-100{
-                height: 90vh;
-                width: 100vw;
-                display: flex;
-            }
-            .flex-center{
-                margin: auto;
-            }
-        </style>
-    </head>
-    <body>
-        <div class="container-fluid">
-            
-            <div class="holder-vh-100">
-                    <div class="flex-center text-center">
-                            <h1>~(application)</h1>
-                            <h3><p class="btn-lg btn-success">~(page-content)</p></h3>
-                    </div> 
-            </div>
-        </div>
-    </body>
-    </html>
-```
-> if you are using bootstrap and jquery like in the html snippet given below, you need to download the binaries and provide the relative path of the directory that contains the binaries and pass it to the server :
-```
-const app = Server({ "template_static" : "path/to/directory" })
-```
-> Any static asset that needs to be used in the application should be put inside the `static` directory and the path should be registered in the `template_static` key and should be passed to the server method
-
-If you are going to use the ejs engine, you need to sepecify template_engine : "ejs" in the object passed to the render method or to the serverOptions:
-
-```
-let title ="Welcome to laneJs"
-let content = await render({ "templateName": "index.ejs", "template_engine": "ejs", "data": { "title": title }})
-res.end(content)
+var app = LaneJs.Server({ template_engine : 'hbs' })
 ```
 
+- For Pug :
 ```
-    <!DOCTYPE html>
-    <html lang="en">
-
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <meta http-equiv="X-UA-Compatible" content="ie=edge">
-        <title><%=title%></title>
-    </head>
-
-    <body>
-        <h1><%=title%></h1>
-    </body>
-
-    </html>
+var app = LaneJs.Server({ template_engine : 'pug' })
 ```
+
+LaneJs provides you the `render` method to render a template using any of these engine.
+To use the `render` method, you need to `require` it as :
+
+```
+var { render } = require('lane-js')
+```
+
+The `render` method takes in three parameters,
+- the server response object
+- the template name
+- an object of renderables (if any)
+
+The syntax for the render method is : 
+```
+render(res,template_name, renderable)
+```
+
+A basic example of rendering is provided below : 
+
+```
+let { render } = require("lane-js")
+
+module.exports = {
+  paths : {
+    "/" : {
+      method : 'GET',
+      handler : (req,res) => {
+        render( res, "index.html", { title : "Welcome to LaneJs" })
+      }
+    } 
+  }
+}
+```
+ 
+ > For more details on rendering, go to the respective website of the rendering engine you are about to use
 
 ### LICENSE 
 Licensed under **MIT**

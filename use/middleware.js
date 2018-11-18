@@ -19,5 +19,5 @@ module.exports = function transformRequestResponse(serverOption, request, respon
       }
     }
   }
-  return { req: request, res: response }
+  return [request, response]
 }
