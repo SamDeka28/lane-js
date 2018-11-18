@@ -6,7 +6,7 @@ LaneJs is a lightweight routing solution for [Node.Js](https://nodejs.org)
 
 A basic route in LaneJs looks like this : 
 ```
-const { route }= require('lane-js/use/router');
+
 module.export = {
   'paths': {
         "/": {
