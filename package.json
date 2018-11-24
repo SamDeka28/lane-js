@@ -1,0 +1,59 @@
+{
+  "_from": "file:lane-js-1.0.7.tgz",
+  "_id": "lane-js@1.0.7",
+  "_inBundle": false,
+  "_integrity": "sha512-nhjRwandfckgrqJXb9XSZ4YHB08hz3SUrG2XDO8Aq/lMWjl0GOOBu2pY5sPyG2taN4kdqEf9aXWyeXzV5iEXhg==",
+  "_location": "/lane-js",
+  "_phantomChildren": {},
+  "_requested": {
+    "type": "file",
+    "where": "D:\\NODE LAB\\OSEM",
+    "raw": "lane-js-1.0.7.tgz",
+    "rawSpec": "lane-js-1.0.7.tgz",
+    "saveSpec": "file:lane-js-1.0.7.tgz",
+    "fetchSpec": "D:\\NODE LAB\\OSEM\\lane-js-1.0.7.tgz"
+  },
+  "_requiredBy": [
+    "#USER",
+    "/"
+  ],
+  "_resolved": "D:\\NODE LAB\\OSEM\\lane-js-1.0.7.tgz",
+  "_shasum": "b7f878008e014ceb5a89ac05d1cad578f463e551",
+  "_spec": "lane-js-1.0.7.tgz",
+  "_where": "D:\\NODE LAB\\OSEM",
+  "author": {
+    "name": "Samudra Deka"
+  },
+  "bugs": {
+    "url": "https://github.com/SamDeka28/lane-js/issues"
+  },
+  "bundleDependencies": false,
+  "dependencies": {
+    "ejs": "^2.6.1",
+    "hbs": "^4.0.1",
+    "pug": "^2.0.3"
+  },
+  "deprecated": false,
+  "description": "A lightweight routing solution for node",
+  "homepage": "https://github.com/SamDeka28/lane-js#readme",
+  "keywords": [
+    "laneJs",
+    "framework",
+    "routing",
+    "rest",
+    "node",
+    "api",
+    "restful"
+  ],
+  "license": "MIT",
+  "main": "index.js",
+  "name": "lane-js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SamDeka28/lane-js.git"
+  },
+  "scripts": {
+    "test": "test"
+  },
+  "version": "1.0.7"
+}
