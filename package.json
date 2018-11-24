@@ -1,1 +1,33 @@
-
+{
+  "author": {
+    "name": "Samudra Deka"
+  },
+  "description": "A lightweight routing solution for node",
+  "keywords": [
+    "laneJs",
+    "framework",
+    "routing",
+    "rest",
+    "nodejs",
+    "api",
+    "restful",
+    "express",
+    "middlewares"
+  ],
+  "license": "MIT",
+  "main": "index.js",
+  "name": "lane-js",
+  "scripts": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/SamDeka28/lane-js"
+  },
+  "version": "1.0.8",
+  "dependencies": {
+    "ejs": "^2.6.1",
+    "hbs": "^4.0.1",
+    "pug": "^2.0.3"
+  }
+}
