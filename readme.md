@@ -344,7 +344,7 @@ function mymiddleware( options ){
 
 ## Form handling
 
-Use `express`'s ***body-parser*** module to handler form.
+Use `express`'s ***body-parser*** module to handle form data.
 
 > See [body-parser](https://www.npmjs.com/package/body-parser) documentation
 
