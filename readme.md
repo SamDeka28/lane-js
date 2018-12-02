@@ -431,7 +431,7 @@ module.exports = {
 
 ## Enabling HTTPS: 
 
-Enabling `https` requires you get a ssl certificate for a Certificate Authority. Once you have those, you can create a secure https server with LaneJs
+Enabling `https` requires an ssl certificate from a Certificate Authority. Once you have those, you can create a secure https server with LaneJs
 
 A basic example of how to enable `https` in LaneJs is given below
 ```
