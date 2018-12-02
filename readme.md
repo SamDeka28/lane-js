@@ -123,6 +123,14 @@ const app = LaneJs.Server({ template_static: "views/static" })
 ```
 const app = LaneJs.Server({ template_engine: "ejs" })
 ```
+- **cahce_control** : set the cache_control policy for the static files. By default, the cache_control is set to 'true'.
+```
+const app = LaneJs.Server({ cache_control: false })
+```
+- **https** : LaneJs by default serves request throught HTTP1.1. To use `https`, pass the `https` option with SSL `key` and `cert`. Other `https` options can be passed to the `https` option.
+ ```
+const app = LaneJs.Server({ https: { key : key,cert : cert }})
+```
 
 ## UrlConfig
 The urlConfig is an object where we define the `pathnames` for the routes we create in our application. This object should be passed in the `urls` key in the serverOptions object.  It has two keys :
@@ -336,7 +344,10 @@ function mymiddleware( options ){
 
 ## Form handling
 
-LaneJs, by default, can handle `x-www-from-urlencoded` data. The data passed is made available in the `req.body` as an object with key-value pair.
+Use `express`'s ***body-parser*** module to handler form.
+
+> See [body-parser](https://www.npmjs.com/package/body-parser) documentation
+
 
 ## Redirection
 
@@ -758,7 +769,9 @@ function mymiddleware( options ){
 
 ## Form handling
 
-LaneJs, by default, can handle `x-www-from-urlencoded` data. The data passed is made available in the `req.body` as an object with key-value pair.
+Use `express`'s ***body-parser*** module to handler form.
+
+> See [body-parser](https://www.npmjs.com/package/body-parser) documentation
 
 ## Redirection
 
@@ -839,6 +852,36 @@ module.exports = {
 ```
  
  > For more details on rendering, go to the respective website of the rendering engine you are about to use
+
+## Enabling HTTPS: 
+
+Enabling `https` requires you get a ssl certificate for a Certificate Authority. Once you have those, you can create a secure https server with LaneJs
+
+A basic example of how to enable `https` in LaneJs is given below
+```
+const LaneJs = require("lane-js")
+const fs = require("fs")
+
+let urlConfig = {
+  'paths': {
+        "/": {
+            method: 'GET',
+            handler: (req, res) => {
+                res.end("Hello")
+            }
+        }
+    }
+}
+
+let httpsOptions = {
+  key : fs.readFileSync(path/to/key),
+  cert : fs.readFileSync(path/to/cert)
+}
+
+const app = LaneJs.Server({ urls : urlConfig, https : httpsOptions })
+
+app.listen(3000, "127.0.0.1", () => console.log("Server is up and running at port 3000"))
+```
 
 ### LICENSE 
 Licensed under **MIT**

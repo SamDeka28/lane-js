@@ -25,6 +25,7 @@ const { pathify } = require("./pathify")
  * @param {object} serverOption.urls.namespace - the namespace if any
  * @param {object} serverOption.urls.paths - the route object
  * @param {Array} serverOption.middlewares - the array of application level middlewares
+ * @param {boolean} serverOption.cache_control - set the cache control to true or false
  * @param {string} serverOption.template_directory - the relative path of the template directory
  * @param {string} serverOption.template_static - the relative path of the directory which contains the assets
  * @param {string} serverOption.template_engine - the template engine to be used : hbs | ejs | pug
@@ -66,12 +67,10 @@ var LaneJs = function (serverOption) {
         }
         if (urlKeys.includes(matchedPath)) {
             let { method, middlewares } = urlConfig.paths[matchedPath]
-            if (middlewares) {
-                serverOption.middlewares = [...serverOption.middlewares, ...middlewares]
-            }
             if (req.method == method) {
                 try {
-                    await middleware(serverOption, req, res, (request, response) => {
+                    middlewares = middlewares ? serverOption.middlewares.concat(middlewares) : serverOption.middlewares
+                    await middleware({ middlewares: middlewares }, req, res, (request, response) => {
                         req = request
                         res = response
                     })
@@ -81,37 +80,16 @@ var LaneJs = function (serverOption) {
             } else {
                 return invalidHttp(res)
             }
-            var rawQuery = queryString.parse(urlOb.query);
+            let rawQuery = queryString.parse(urlOb.query);
             req.query = rawQuery ? rawQuery : {};
-
-            var buffer = "";
-            var body = {};
-
-            if (req.body) {
-                try {
-                    return urlConfig.paths[matchedPath].handler(req, res)
-                } catch (err) {
-                    console.log(err)
-                }
-            } else {
-                req.on('data', function (data) {
-                    buffer += data.toString();
-                });
-                req.on("end", async function () {
-                    if (!req.body) {
-                        body = queryString.parse(buffer);
-                        req.body = body ? body : {};
-                    }
-                    try {
-                        return urlConfig.paths[matchedPath].handler(req, res)
-                    } catch (err) {
-                        console.log(err)
-                    }
-                })
+            try {
+                return urlConfig.paths[matchedPath].handler(req, res)
+            } catch (err) {
+                console.log(err)
             }
             return
         } else {
-            if (req.method == "GET" && pathname != '/favicon.ico') {
+            if (req.method == "GET") {
                 try {
                     return serve({ request: req, response: res, serverOption: serverOption }, matchedPath)
                 } catch (err) {
