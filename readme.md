@@ -251,7 +251,7 @@ let app = LaneJs.Server(serverOptions)
 app.listen(3000, () => console.log('Server is up and running at 3000'))
 ```
 
-## Routing Using LaneJs's default urlConfig structure
+## Routing using LaneJs's default urlConfig structure
 
 Creating a basic route in LaneJs :
 
@@ -280,6 +280,7 @@ app.listen(3000, _=> console.log("Server is up and running at 3000))
 Start the server `node app.js`. You can now use the route that you have created. This is the basic step for creating a Server with a route in **LaneJs**
 
 ### Routing using Routify
+
 Routify is a wrapper module which lets you write *express* like routes. Routes written using Routify desugars to the urlConfig convention used by LaneJs on application startup. Routify, by default, provides the following HTTP methods - 
 - GET
 - POST
