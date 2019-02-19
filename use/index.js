@@ -17,7 +17,7 @@ const middleware = require("./middleware")
 const { rendererOptions, render, redirect, invalidHttp } = require("./render")
 const matchPathName = require("./common/matchPath")
 const { pathify } = require("./pathify")
-
+const { Routify } = require("./routify")
 /**
  * 
  * @param {object} serverOption 
@@ -69,6 +69,7 @@ var LaneJs = function (serverOption) {
             let { method, middlewares } = urlConfig.paths[matchedPath]
             if (req.method == method) {
                 try {
+                    !serverOption.hasOwnProperty('middlewares') ? serverOption['middlewares'] = [] : null
                     middlewares = middlewares ? serverOption.middlewares.concat(middlewares) : serverOption.middlewares
                     await middleware({ middlewares: middlewares }, req, res, (request, response) => {
                         req = request
@@ -117,4 +118,4 @@ var LaneJs = function (serverOption) {
     return server
 }
 
-module.exports = { Server: LaneJs, render: render, redirect: redirect, pathify: pathify }
+module.exports = { Server: LaneJs, render: render, redirect: redirect, pathify: pathify, Routify: Routify }

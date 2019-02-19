@@ -5,39 +5,29 @@
  * @param {object} request 
  * @param {object} response 
  */
-async function transformRequestResponse(serverOption, request, response, setResponse) {
-  let hasNext = true
-  let middlewares
-  if (serverOption && serverOption['middlewares']) {
-    if (serverOption.middlewares.length) {
-      for (let ini = 0; ini < serverOption.middlewares.length; ini++) {
-        hasNext = false
-        middlewares = new Promise(
-          resolve => {
-            try {
-              serverOption.middlewares[ini](request, response, function (err) {
-                if (err) {
-                  if (err instanceof Error) {
-                    console.error(err)
-                    return
-                  }
-                  throw Error(err)
-                } else {
-                  hasNext = true
-                  resolve([request, response])
-                }
-              })
-            } catch (err) {
-              console.log(err)
-            }
-          })
-        if (!hasNext) {
-          break
+async function transformRequestResponse({ middlewares }, request, response, setResponse) {
+  let hasNext;
+  for (let middleware of middlewares) {
+    hasNext = false
+    middleware = new Promise(resolve => {
+      middleware(request, response, function (err) {
+        if (err) {
+          if (err instanceof Error) {
+            console.error(err)
+            return
+          }
+          throw Error(err)
+        } else {
+          hasNext = true
         }
-      }
-    }
-    [request, response] = await middlewares
+        resolve([request, response])
+      })
+    })
+    var [req, res] = await middleware
+
+    if (!hasNext)
+      break;
   }
-  setResponse(request, response)
+  setResponse(req, res)
 }
-module.exports = transformRequestResponse 
+module.exports = transformRequestResponse

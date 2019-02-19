@@ -18,8 +18,22 @@ module.export = {
 }
 ```
 
+Or using `Routify`, you can create routes as (more on Routify below) - 
+```
+let { Routify } = require("lane-js");
+
+let route = new Routify();
+
+route.get( "/" , function(req,res){
+  res.end("Hello");
+})
+
+module.export = route.expose();
+```
+
 ### Installing LaneJs
-> before installing LaneJs, you must have node installed in your system.
+> before installing LaneJs, you must have node installed in your system. LaneJs relies on async/await, and therefore requires you to install **Node** version 7.6 or higher
+
 LaneJs can be installed by using the `npm install` command
 ```
 npm install lane-js --save
@@ -33,6 +47,8 @@ npm install lane-js --save
 - Param parsing support
 - Namespacing
 
+### New in this version
+- Routify
 
 ## A Quick guide to start with LaneJs
 To quickly get started with LaneJs, go to  [https://github.com/SamDeka28/lanify07](https://github.com/SamDeka28/lanify07) and clone the repo.
@@ -53,8 +69,10 @@ yourappname
 Once you have created the structure, open the terminal and browse to your app directory
 Type in the following commands and follow the instructions: 
 ```
-npm init
+npm init -y
 ```
+> the -y flag creates a default package.json for you
+
 This will create you package.json file
 
 ### Installing the dependencies
@@ -233,7 +251,7 @@ let app = LaneJs.Server(serverOptions)
 app.listen(3000, () => console.log('Server is up and running at 3000'))
 ```
 
-## Routing
+## Routing Using LaneJs's default urlConfig structure
 
 Creating a basic route in LaneJs :
 
@@ -260,6 +278,66 @@ app.listen(3000, _=> console.log("Server is up and running at 3000))
 ```
 
 Start the server `node app.js`. You can now use the route that you have created. This is the basic step for creating a Server with a route in **LaneJs**
+
+### Routing using Routify
+Routify is a wrapper module which lets you write *express* like routes. Routes written using Routify desugars to the urlConfig convention used by LaneJs on application startup. Routify, by default, provides the following HTTP methods - 
+- GET
+- POST
+- PUT
+- PATCH
+- DELETE
+
+Writing routes using Routify requires you to first import the Routify module as
+```
+let { Routify } = require("lane-js");
+```
+After you have imported the Routify module, create a new instance of Routify as:
+```
+let routes = new Routify();
+```
+Routify also lets you use namespace your code. Just pass a string representing the `namespace` in the Routify constructor as :
+```
+let route = new Routify('yournamespace');
+```
+
+A simple example of writing a route using Routify is given below :
+```
+let { Routify } = require("lane-js");
+
+let route = new Routify("users");
+
+route.get("/index", function(req,res){
+  res.end("This path can be accesed from /users/index");
+});
+
+module.exports = route.expose();
+```
+
+`Routify.expose()` exposes all the routes created using Routify so that it can be passed to the `urls` in the server.
+
+> Use Routify in conjuction with Pathify to combine multiple modules together and pass it to the server's `url` key.
+
+### Using middlewares with Routify
+
+Using middlewares with Routify is simple, any number of functions passed between the first `parameter`(the pathname) and the last `parameter` (which is the handler function) are treated as middlewares. 
+
+For example:
+```
+/**middleware one*/
+let m1 = function(req,res,next){
+  console.log("middleware 1");
+  next();
+}
+/**middleware two*/
+let m2 = function(req,res,next){
+  console.log("middleware 2");
+  next();
+}
+
+route.get( "/index" , m1, m2, function(req,res){
+  res.end("This path can be accesed from /users/index");
+});
+```
 
 ### Path Params
 
