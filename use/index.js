@@ -43,17 +43,17 @@ var LaneJs = function (serverOption) {
         rendererOptions(serverOption)
     } catch (err) { console.log(err) }
 
+    /**operations on the urlConfig */
+    let urlConfig = serverOption.urls
+    let urlRoutes = urlConfig.paths
+    let urlKeys = Object.keys(urlRoutes)
+
     let server
+
     let handler = async (req, res) => {
         var urlOb = url.parse(req.url)
         var pathname = urlOb.pathname
-        try {
-            var urlConfig = serverOption.urls
-        } catch (err) {
-            console.log(err)
-        }
 
-        let urlKeys = Object.keys(urlConfig.paths)
         try {
             if (!urlKeys.includes(pathname)) {
                 var pathExtracted = matchPathName(pathname, urlKeys)
@@ -66,15 +66,17 @@ var LaneJs = function (serverOption) {
             console.log(err)
         }
         if (urlKeys.includes(matchedPath)) {
-            let { method, middlewares } = urlConfig.paths[matchedPath]
+            let { method, middlewares } = urlRoutes[matchedPath]
             if (req.method == method) {
                 try {
-                    !serverOption.hasOwnProperty('middlewares') ? serverOption['middlewares'] = [] : null
-                    middlewares = middlewares ? serverOption.middlewares.concat(middlewares) : serverOption.middlewares
-                    await middleware({ middlewares: middlewares }, req, res, (request, response) => {
-                        req = request
-                        res = response
-                    })
+                    let appMiddlewares = !serverOption.hasOwnProperty('middlewares') ? [] : serverOption['middlewares']
+                    middlewares = middlewares ? appMiddlewares.concat(middlewares) : appMiddlewares
+                    if (middlewares.length) {
+                        await middleware({ middlewares: middlewares }, req, res, (request, response) => {
+                            req = request
+                            res = response
+                        })
+                    }
                 } catch (err) {
                     console.log(err)
                 }
@@ -84,7 +86,7 @@ var LaneJs = function (serverOption) {
             let rawQuery = queryString.parse(urlOb.query);
             req.query = rawQuery ? rawQuery : {};
             try {
-                return urlConfig.paths[matchedPath].handler(req, res)
+                return urlRoutes[matchedPath].handler(req, res)
             } catch (err) {
                 console.log(err)
             }
