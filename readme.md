@@ -5,34 +5,26 @@
 LaneJs is a lightweight routing solution for [Node.Js](https://nodejs.org)
 
 A basic route in LaneJs looks like this : 
-```
-module.export = {
-  'paths': {
-        "/": {
-            method: 'GET',
-            handler: (req, res) => {
-                res.end("Hello")
-            }
-        }
-    }
-}
-```
 
-Or using `Routify`, you can create routes as (more on Routify below) - 
+Using `Routify`, you can create routes as (more on Routify below) - 
 ```
 let { Routify } = require("lane-js");
 
 let route = new Routify();
 
 route.get( "/" , function(req,res){
-  res.end("Hello");
-})
+  res.end("Inside GET method on Route /");
+});
+
+route.post("/", function(req,res){
+  res.end("Inside POST method on Route /");
+});
 
 module.export = route.expose();
 ```
 
 ### Installing LaneJs
-> before installing LaneJs, you must have node installed in your system. LaneJs relies on async/await, and therefore requires you to install **Node** version 7.6 or higher
+> before installing LaneJs, you must have node installed in your system. LaneJs relies on **async/await**, and therefore requires you to install **Node** version 7.6 or higher
 
 LaneJs can be installed by using the `npm install` command
 ```
@@ -46,9 +38,6 @@ npm install lane-js --save
 - Body parsing support
 - Param parsing support
 - Namespacing
-
-### New in this version
-- Routify
 
 ## A Quick guide to start with LaneJs
 To quickly get started with LaneJs, go to  [https://github.com/SamDeka28/lanify07](https://github.com/SamDeka28/lanify07) and clone the repo.
@@ -86,22 +75,15 @@ This will install LaneJs as your project dependency
 Open your app.js file and paste in the following code to create the LaneJs server : 
 
 ```
-const LaneJs = require("lane-js")
+const { Server, Routify } = require("lane-js");
 
-let urlConfig = {
-  'paths': {
-        "/": {
-            method: 'GET',
-            handler: (req, res) => {
-                res.end("Hello")
-            }
-        }
-    }
-}
+let route = new Routify();
 
-const app = LaneJs.Server({ urls : urlConfig })
+route.get("/", (req, res) => res.end("Hello World"));
 
-app.listen(3000, "127.0.0.1", () => console.log("Server is up and running at port 3000"))
+const app = Server({ urls: route.expose() });
+
+app.listen(3000, "127.0.0.1", () => console.log("Server is up and running at port 3000")));
 ```
 
 Thats all for creating the server
@@ -111,34 +93,37 @@ Thats all for creating the server
 ```
 const app = LaneJs.Server({ middlewares : [
     function lane(req, res, next) {
-        console.log("hello")
-        next()
+        console.log("hello");
+        next();
     }
-] })
+] });
 ```
 
-- **urls** : this take a urlConfig object, that contains a `paths` key which is an object of routes defined for the application. Each path in the `paths` object is an object that should have two required keys - method, handler
+- **urls** : this takes a **Routify** instance which defines the routes in the application. Mutliple Routify instances can also be passed to the urls with an array of Routify instances. 
+
 ```
-let urlConfig = {
-    "paths": {
-        "/": {
-          method : 'GET',
-          handler : require("/path/to/route")
-      }
-    }
-}
-const app = LaneJs.Server({ urls : urlConfig })
+let LanesJs = require("lane-js")
+
+let route = new LaneJs.Routify();
+
+route.get("/", (req,res) => res.end("Hello World"));
+
+const app = LaneJs.Server({ urls : route.expose() }).listen(3000)
 ```
+
 - **template_directory** : the relative path for the directory that contains your static html or template files
 ```
 const app = LaneJs.Server({ template_directory: "views" })
 ```
+
 - **template_static** : the relative path for the directory that contains you static assets such as boostrap files, jquery files, images etc
 ```
+
 const app = LaneJs.Server({ template_static: "views/static" })
 ```
 - **template_engine** : the template engine that you are using, LaneJs supports ejs | handlebars | pug for rendering views.
 ```
+
 const app = LaneJs.Server({ template_engine: "ejs" })
 ```
 - **cahce_control** : set the cache_control policy for the static files. By default, the cache_control is set to 'true'.
@@ -150,138 +135,12 @@ const app = LaneJs.Server({ cache_control: false })
 const app = LaneJs.Server({ https: { key : key,cert : cert }})
 ```
 
-## UrlConfig
-The urlConfig is an object where we define the `pathnames` for the routes we create in our application. This object should be passed in the `urls` key in the serverOptions object.  It has two keys :
-
-- `paths` : this object contains key-value pair for our routes; the `key` being the pathname and the `value` being an object where we can define our `method`,`handler` and `middlewares` (`middlewares` is optional). The method is the `http` verb (GET, POST, PUT etc),the `handler` is the route handler function which takes two parameters `req` and `res` and the `middlewares` is an array of middleware functions. For example.
-```
-const urlConfig = {
-  "paths" : {
-      "/": {
-        method : 'GET',
-        middlewares : [sayhi] //assuming that sayhi is a middleware function
-        handler : ( req, res) => {
-          res.end("Hello World")
-        }
-      }
-  }
-}
-```
-- `namespace`: The `namespace` is a key that when defined, prepends to each `pathname` defined in the `paths` object of the urlConfig. This option can only be used with `pathify`. A simple example of using urlConfig using namespace is given below:
-
-`urlConfig`
-```
-let urlConfig = {
-  'namespace': "users",
-  'paths': {
-    "/index": {
-      method : 'GET',
-      handler: (req, res) => {
-        res.end("Welcome to LaneJs")
-      }
-    }
-  }
-}
-
-module.exports = urlConfig
-```
-
-In `app.js` : 
-
-```
-const LaneJs = require("lane-js")
-const { pathify } = require("lane-js/use/pathify")
-
-let urls = pathify(require("./urlConfig"))
-
-const serverOptions = {
-  urls: urls,
-  template_directory: "views",
-  template_static: "views",
-  template_engine: "ejs"
-}
-
-let app = LaneJs.Server(serverOptions)
-
-app.listen(3000, () => console.log('Server is up and running at 3000'))
-```
-Now you can access `/index` route that you have created from http://localhost:3000/users/index
-
 ## Pathify :
-
-`Pathify` is module that is used to combine `urlConfigs` of different modules in your application into one single urlConfig that can be passed to the `urls` option in the serverOptions. There are two ways to import `pathify` : -
-- *Along with the Server* : `const { Server, pathify } = require('lane-js')`
-- *Standalone* : `const { pathify } = require("lane-js/use/pathify")`
-
-For example :
-```
-const LaneJs = require("lane-js")
-const { pathify } = require("lane-js/use/pathify")
-
-let user = {
-    namespace : 'user',
-    paths : {
-        "/create" : {
-          method : 'POST',
-          handler : (req, res) => res.end("Greetings from /user/create")
-        }
-    }
-}
-
-let index = {
-    paths : {
-        "/" : {
-          method : 'GET',
-          handler : (req, res) => res.end("Greetings from /")
-        }
-    }
-}
-
-let urls = pathify(index, user)
-
-const serverOptions = {
-  urls: urls,
-  template_directory: "views",
-  template_static: "views",
-  template_engine: "ejs"
-}
-
-let app = LaneJs.Server(serverOptions)
-
-app.listen(3000, () => console.log('Server is up and running at 3000'))
-```
-
-## Routing using LaneJs's default urlConfig structure
-
-Creating a basic route in LaneJs :
-
-- `urlConfig.js` : 
-```
-const urlConfig = {
-  "paths" : {
-      "/": { method : 'GET', handler : (req, res) => res.end("Hello World") }
-  }
-}
-
-module.exports = urlConfig
-```
-
-Once you have declared the route in the urlConfig, pass the urlConfig to the `serverOptions` in the `app.js` file :
-- `app.js` : 
-```
-const { Server } = require("lane-js");
-const urlConfig = require('./urlConfig')
-
-let app = Server({urls : urlConfig})
-
-app.listen(3000, _=> console.log("Server is up and running at 3000))
-```
-
-Start the server `node app.js`. You can now use the route that you have created. This is the basic step for creating a Server with a route in **LaneJs**
+- This module is now a permanent implementation in lane-js
 
 ### Routing using Routify
 
-Routify is a wrapper module which lets you write *express* like routes. Routes written using Routify desugars to the urlConfig convention used by LaneJs on application startup. Routify, by default, provides the following HTTP methods - 
+Routify is a routing module which lets you write *express* like routes. Routes written using Routify desugars to the urlConfig convention used by LaneJs on application startup. Routify, by default, provides the following HTTP methods - 
 - GET
 - POST
 - PUT
@@ -296,7 +155,7 @@ After you have imported the Routify module, create a new instance of Routify as:
 ```
 let routes = new Routify();
 ```
-Routify also lets you use namespace your code. Just pass a string representing the `namespace` in the Routify constructor as :
+Routify also lets you use namespace your routes. Just pass a string representing the `namespace` in the Routify constructor as :
 ```
 let route = new Routify('yournamespace');
 ```
@@ -314,13 +173,64 @@ route.get("/index", function(req,res){
 module.exports = route.expose();
 ```
 
-`Routify.expose()` exposes all the routes created using Routify so that it can be passed to the `urls` in the server.
+`Routify.expose()` exposes all the routes created on a Routify instance so that it can be passed to the `urls` in the server.
 
-> Use Routify in conjuction with Pathify to combine multiple modules together and pass it to the server's `url` key.
+> Routify lets you chain multiple http methods on one instance of Routify
+```
+let route = new Routify();
 
-### Using middlewares with Routify
+route.get("/" , (req, res) => res.end("Route get") )
+  .post("/" , (req, res) => res.end("Route post) )
+  .expose();
 
-Using middlewares with Routify is simple, any number of functions passed between the first `parameter`(the pathname) and the last `parameter` (which is the handler function) are treated as middlewares. 
+let app = Server({url : route})
+
+app.listen(3000,_=>console.log("Server is up and running"));
+
+```
+
+### Path Params
+
+A basic example of defining path params is shown below:
+```
+route.get("/user/:id", (req,res) => {
+  let id = req.params.id
+  res.end(id)
+})
+
+``` 
+
+The params can be accessed in a route using `req.params`
+
+> You can define multiple params in a path. eg : '/user/:id/name/:name'.
+
+### Query Strings
+
+The Query string of a url can be accessed in a route using `req.query`. `req.query` returns an object with key-value pairs.
+
+For example: Suppose a user request an url `'http://localhost:3000/?fname=John&lname=Doe'`. The value of *fname* and *lname* can be accessed as `req.query.fname` and `req.query.lname` respectively.
+
+## Middlewares
+
+Middlewares are functions that manipulates the request and the response object. Middlewares in LaneJs are of three types : 
+- **Application level** : Application level middlewares are available throughout the application.
+To use a application level middleware, you need to declare it in the app.js file when you are creating the server by passing { middlewares : [ middlewarename ]} in the server method.
+> the 'middlewares' is an array of middleware function. The middlewares will be executed in the sequence they are defined
+
+```
+let Lane = require("lane-js")
+var app = Lane.Server({ middlewares : [] })
+```
+
+- **Router level** : Router level middlewares are available for all the routes of a Routify instance in which its has been defined. Router level middleware can be applied to the routes with **Routify.use()**. Routify.use() accept both single and an array of middleware functions.
+
+``` 
+let route = new Routify().use(morgan('dev'));
+
+route.get("/" , (req, res) => res.end("Router level middlewares"));
+
+```
+- **Route level** : Using route level middlewares with Routify is simple, any number of functions passed between the first `parameter`(the pathname) and the last `parameter` (which is the handler function) are treated as middlewares. 
 
 For example:
 ```
@@ -340,68 +250,16 @@ route.get( "/index" , m1, m2, function(req,res){
 });
 ```
 
-### Path Params
-
-A basic example of defining path params is shown below:
-```
-let urlConfig ={
-  paths : {
-    "/user/:id" : { 
-      method : 'GET',
-      handler : ( req, res ) => {
-        let id = req.params.id
-        res.end(id)
-      }
-    } 
-  }
-}
-``` 
-
-The params can be accessed in a route using `req.params`
-
-> You can define multiple params in a path. eg : '/user/:id/name/:name'.
-
-### Query Strings
-
-The Query string of a url can be accessed in a route using `req.query`. `req.query` returns an object with key-value pairs.
-
-For example: Suppose a user request an url `'http://localhost:3000/?fname=John&lname=Doe'`. The value of *fname* and *lname* can be accessed as `req.query.fname` and `req.query.lname` respectively.
-
-## Middlewares
-
-Middlewares are functions that manipulates the request and the response object. Middlewares in LaneJs are of two types : 
-- **Application level** : Application level middlewares are available throughout the application.
-To use a application level middleware, you need to declare in the app.js file when you are creating the server by passing { middlewares : [ middlewarename ]} in the server method.
-> the 'middlewares' is an array of middleware function. The middlewares will be executed in the sequence they are defined
-
-```
-let Lane = require("lane-js")
-var app = Lane.Server({ middlewares : [] })
-```
-
-- **Route level** : Route level middlewares are available for the route where it is declared. To use middlewares in a route, declare the `middlewares` key with an array of middlewares
-
-``` 
-"/user/:id" : { 
-      method : 'GET',
-      middlewares : [sayhi],
-      handler : ( req, res ) => {
-        let id = req.params.id
-        res.end(id)
-      }
-    } 
-```
-
 ### Creating your own middleware in LaneJs
 
-Writing a middleware in **LaneJs** is identical to how you create middlewares for **ExpressJs** ( The design is made similar to ensure support for a range of express middleware already out there on *npm*). Creating a middleware in LaneJs requires passing the ***request***, the ***response***, and the ***next*** function to the middleware function. Calling the `next()` function will pass the control to the next middleware in the stack. A basic example of a middleware function is shown below : 
+Writing a middleware in **LaneJs** is identical to how you would create middlewares for **ExpressJs** ( The design is made similar to ensure support for a range of express middleware already out there on *npm*). Creating a middleware in LaneJs requires passing the ***request***, the ***response***, and the ***next*** function to the middleware function. Calling the `next()` function will pass the control to the next middleware in the stack. A basic example of a middleware function is shown below : 
 
 ``` 
 function mymiddleware(req, res, next){
   req.sayHello = ()=>{
-    return "Hello"
+    return "Hello";
   }
-  next()
+  next();
 }
 ```
 
@@ -411,9 +269,9 @@ For a middleware with options :
 
 ``` 
 function mymiddleware( options ){
-  return (req,res , next)=>{
-    console.log(options)
-    next()
+  return (req, res, next)=>{
+    console.log(options);
+    next();
   }
 }
 ```
@@ -426,6 +284,10 @@ function mymiddleware( options ){
 Use `express`'s ***body-parser*** module to handle form data.
 
 > See [body-parser](https://www.npmjs.com/package/body-parser) documentation
+
+## Multipart-data
+
+Use [multer](https://www.npmjs.com/package/multer) or similar form handling modules to handle multipart data
 
 
 ## Redirection

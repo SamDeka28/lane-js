@@ -19,7 +19,7 @@ const matchPathName = require("./common/matchPath")
 const { pathify } = require("./pathify")
 const { Routify } = require("./routify")
 /**
- * 
+ * @module LaneJs
  * @param {object} serverOption 
  * @param {object} serverOption.urls - the urlConfigs
  * @param {object} serverOption.urls.namespace - the namespace if any
@@ -42,31 +42,35 @@ var LaneJs = function (serverOption) {
     try {
         rendererOptions(serverOption)
     } catch (err) { console.log(err) }
-
+    let urlConfig = null;
     /**operations on the urlConfig */
-    let urlConfig = serverOption.urls
+    if (typeof serverOption.urls == "object" && Array.isArray(serverOption.urls)) {
+        urlConfig = pathify(...serverOption.urls);
+    } else {
+        urlConfig = serverOption.urls
+    }
     let urlRoutes = urlConfig.paths
-    let urlKeys = Object.keys(urlRoutes)
-
     let server
 
     let handler = async (req, res) => {
         var urlOb = url.parse(req.url)
         var pathname = urlOb.pathname
-
+        let reqMethod = req.method;
+        let currRoutesInMethod = urlRoutes[reqMethod];
         try {
-            if (!urlKeys.includes(pathname)) {
+            if (!currRoutesInMethod.hasOwnProperty(pathname)) {
+                let urlKeys = Object.keys(currRoutesInMethod);
                 var pathExtracted = matchPathName(pathname, urlKeys)
                 var matchedPath = pathExtracted.pathname
                 req.params = pathExtracted.params
             } else {
-                matchedPath = pathname
+                matchedPath = pathname;
             }
         } catch (err) {
             console.log(err)
         }
-        if (urlKeys.includes(matchedPath)) {
-            let { method, middlewares } = urlRoutes[matchedPath]
+        if (currRoutesInMethod.hasOwnProperty(matchedPath)) {
+            let { method, middlewares } = currRoutesInMethod[matchedPath]
             if (req.method == method) {
                 try {
                     let appMiddlewares = !serverOption.hasOwnProperty('middlewares') ? [] : serverOption['middlewares']
@@ -86,7 +90,7 @@ var LaneJs = function (serverOption) {
             let rawQuery = queryString.parse(urlOb.query);
             req.query = rawQuery ? rawQuery : {};
             try {
-                return urlRoutes[matchedPath].handler(req, res)
+                return currRoutesInMethod[matchedPath].handler(req, res)
             } catch (err) {
                 console.log(err)
             }

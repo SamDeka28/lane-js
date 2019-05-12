@@ -1,4 +1,5 @@
 /**
+ * @module pathify
  * @param args - the urlConfigs
  * @return {object} paths
  */
@@ -8,13 +9,27 @@ module.exports.pathify = function (...args) {
         if (arguments[key].hasOwnProperty('namespace')) {
             let namespace = arguments[key]['namespace']
             delete arguments[key]['namespace']
-            let pathKeys = Object.keys(arguments[key].paths)
-            pathKeys.forEach(path => {
-                arguments[key].paths[`/${namespace}${path}`] = arguments[key].paths[path]
-                delete arguments[key].paths[path]
-            });
+            urls = { ...reconstructUrl(arguments, key, urls, namespace) };
+        } else {
+            urls = { ...reconstructUrl(arguments, key, urls) }
         }
-        urls = Object.assign(urls, arguments[key].paths);
     }
     return { paths: urls }
+}
+
+function reconstructUrl(arguments, key, urls, namespace) {
+    let pathMethods = arguments[key].paths;
+    for (const method in pathMethods) {
+        !urls.hasOwnProperty(method) ? urls[method] = {} : null
+        let paths = pathMethods[method];
+        for (const path in paths) {
+            let pathProperties = paths[path];
+            if (namespace) {
+                urls[method][`/${namespace}${path}`] = pathProperties;
+            } else {
+                urls[method][path] = pathProperties
+            }
+        }
+    }
+    return urls
 }
