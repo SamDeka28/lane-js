@@ -18,6 +18,7 @@ const { rendererOptions, render, redirect, invalidHttp } = require("./render")
 const matchPathName = require("./common/matchPath")
 const { pathify } = require("./pathify")
 const { Routify } = require("./routify")
+const util=require("./common/defaultMiddlewares")
 /**
  * @module LaneJs
  * @param {object} serverOption 
@@ -29,6 +30,7 @@ const { Routify } = require("./routify")
  * @param {string} serverOption.template_directory - the relative path of the template directory
  * @param {string} serverOption.template_static - the relative path of the directory which contains the assets
  * @param {string} serverOption.template_engine - the template engine to be used : hbs | ejs | pug
+ * @param {string} serverOption.root_dir - the root directory of the app
  * @param {object} serverOption.https - the secure server options if any
  * @param {string} serverOption.https.key - the private ssl key
  * @param {string} serverOption.https.cert - the ssl certificate
@@ -57,6 +59,9 @@ var LaneJs = function (serverOption) {
         var pathname = urlOb.pathname
         let reqMethod = req.method;
         let currRoutesInMethod = urlRoutes[reqMethod];
+        req.template_directory = serverOption['template_directory'];
+        req.template_static = serverOption['template_static'];
+        req.root_dir=serverOption['root_dir'];
         try {
             if (!currRoutesInMethod.hasOwnProperty(pathname)) {
                 let urlKeys = Object.keys(currRoutesInMethod);
@@ -73,7 +78,7 @@ var LaneJs = function (serverOption) {
             let { method, middlewares } = currRoutesInMethod[matchedPath]
             if (req.method == method) {
                 try {
-                    let appMiddlewares = !serverOption.hasOwnProperty('middlewares') ? [] : serverOption['middlewares']
+                    let appMiddlewares = !serverOption.hasOwnProperty('middlewares') ? [util] : serverOption['middlewares'].push(util)
                     middlewares = middlewares ? appMiddlewares.concat(middlewares) : appMiddlewares
                     if (middlewares.length) {
                         await middleware({ middlewares: middlewares }, req, res, (request, response) => {

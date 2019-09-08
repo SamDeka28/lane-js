@@ -39,6 +39,9 @@ npm install lane-js --save
 - Param parsing support
 - Namespacing
 
+### New in this version
+- Response object middlewares
+
 ## A Quick guide to start with LaneJs
 To quickly get started with LaneJs, go to  [https://github.com/SamDeka28/lanify07](https://github.com/SamDeka28/lanify07) and clone the repo.
 
@@ -278,6 +281,65 @@ function mymiddleware( options ){
 > Similar to Express, you can throw an `error` by passing an Error message or an error object to the next() function. For example:
 > `next(new Error("There was and error while executing the middleware"))` or `next('Error in Middleware')`
 
+## Response object
+
+The response object now has the following methods added to it.
+- **res.json** : Allows you to send JSON reponse. 
+```
+  res.json({message : "Welcome to LaneJs"});
+```
+
+- res.sendStatus: Allows you to set the reponse status code and send the message related to the code. For example:
+```
+  res.sendStatus(200);
+  //equivalent to res.status(200).send('Ok');
+
+  res.sendStatus(400);
+  //equivalent to res.status(400).send('Bad request');
+```
+
+- res.status: Allows you to set the HTTP status for the response. It allows chaining other response methods.For example:
+```
+  res.status(200).json({message: "Success"});
+```
+
+- **res.download** : Transfers a file as an downloadable attachment. It takes two parameters: filepath, options(optional).
+Options currently has only two configurable - root and downloadas.
+Syntax
+```
+  res.download(filepath,{downloadas : filename,root : root_dir})
+```
+If downloadas option is not specified, the file will be downloaded as its name, otherwise the filename will be set to the provided name.
+
+```
+  res.download("/img.jpeg",{downloadas : "beatifulimage"});
+```
+> note that res.download allows downloading files only from the `template_static` set as ServerOptions for security reasons unless the root is set in the options.
+
+Setting a different root
+```
+  res.download("avatar.jpg",{downloadas : "profile",root : "../public"});
+```
+
+- **res.sendFile**: Allows you to render a file based on its mime type.It takes two parameters: filepath, options(optional).
+Options currently has only one configurable - root.
+
+Syntax
+```
+  res.sendFile(filepath,{root : root_dir});
+```
+> note that res.sendFile allows accessing files only from the `template_static` set as ServerOptions for security reasons unless the root is set in the options.
+
+- **res.render** : res.render is an extention of render method provided by lanejs to render a html file using the three template engines provided.
+```
+  res.render(filename,contextData)
+```
+
+- **res.redirect** : res.redirect is an extention of redirect method provided by lanejs to perform a redirection.
+```
+  res.redirect(location);
+```
+
 
 ## Form handling
 
@@ -310,6 +372,10 @@ or
 redirect(res,"/")
 ```
 
+**note**: From lanejs version 1.0.14, the redirect method has been added to the response object.
+```
+res.redirect("redirection_url");
+```
 ## Templating : 
 
 LaneJs supports these three templating engines -
@@ -334,7 +400,7 @@ var app = LaneJs.Server({ template_engine : 'hbs' })
 var app = LaneJs.Server({ template_engine : 'pug' })
 ```
 
-LaneJs provides you the `render` method to render a template using any of these engine.
+LaneJs provides you the `render` method to render  a template using any of these engine.
 To use the `render` method, you need to `require` it as :
 
 ```
@@ -354,20 +420,19 @@ render(res,template_name, renderable)
 A basic example of rendering is provided below : 
 
 ```
-let { render } = require("lane-js")
+const { render, Routify } = require("lane-js");
 
-module.exports = {
-  paths : {
-    "/" : {
-      method : 'GET',
-      handler : (req,res) => {
-        render( res, "index.html", { title : "Welcome to LaneJs" })
-      }
-    } 
-  }
-}
+let route = new Routify();
+
+route.get("/", (req, res) => render(res,"index.ejs"));
+
+// route.get("/",(req,res)=>res.render("index.ejs",{message : "Welcome to laneJs})
+
+module.exports =route.expose();
 ```
  
+From version 1.0.14, a render method has been added to the response object.(See Response object for more details)
+
  > For more details on rendering, go to the respective website of the rendering engine you are about to use
 
 ## Enabling HTTPS: 
@@ -379,23 +444,16 @@ A basic example of how to enable `https` in LaneJs is given below
 const LaneJs = require("lane-js")
 const fs = require("fs")
 
-let urlConfig = {
-  'paths': {
-        "/": {
-            method: 'GET',
-            handler: (req, res) => {
-                res.end("Hello")
-            }
-        }
-    }
-}
+let route = new LaneJs.Routify();
+
+route.get("/", (req, res) => render(res,"index.ejs"));
 
 let httpsOptions = {
   key : fs.readFileSync(path/to/key),
   cert : fs.readFileSync(path/to/cert)
 }
 
-const app = LaneJs.Server({ urls : urlConfig, https : httpsOptions })
+const app = LaneJs.Server({ urls : [route.expose()], https : httpsOptions })
 
 app.listen(3000, "127.0.0.1", () => console.log("Server is up and running at port 3000"))
 ```
