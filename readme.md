@@ -138,6 +138,12 @@ const app = LaneJs.Server({ cache_control: false })
 const app = LaneJs.Server({ https: { key : key,cert : cert }})
 ```
 
+- **root_dir** : Set the root_dir which can be accessed throughout the application using req.root_dir
+```
+  const app = LaneJs.Server({root_dir : __dirname});
+```
+
+
 ## Pathify :
 - This module is now a permanent implementation in lane-js
 
@@ -289,7 +295,7 @@ The response object now has the following methods added to it.
   res.json({message : "Welcome to LaneJs"});
 ```
 
-- res.sendStatus: Allows you to set the reponse status code and send the message related to the code. For example:
+- **res.sendStatus**: Allows you to set the reponse status code and send the message related to the code. For example:
 ```
   res.sendStatus(200);
   //equivalent to res.status(200).send('Ok');
@@ -298,7 +304,7 @@ The response object now has the following methods added to it.
   //equivalent to res.status(400).send('Bad request');
 ```
 
-- res.status: Allows you to set the HTTP status for the response. It allows chaining other response methods.For example:
+- **res.status**: Allows you to set the HTTP status for the response. It allows chaining other response methods.For example:
 ```
   res.status(200).json({message: "Success"});
 ```
