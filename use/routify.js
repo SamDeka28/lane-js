@@ -11,32 +11,61 @@ let Routify = function (namespace) {
   if (namespace) {
     this.urls['namespace'] = namespace
   }
-  /**get HTTP method */
+  /**
+   * @method get
+   * @param {string} path - the route path
+   * @param {Function} args - handler functions 
+   * @memberof Routify
+   */
   this.get = (path, ...args) => {
     routeMaker(this, 'GET', args, path);
     return this
   }
-  /**post HTTP method */
+   /**
+   * @method post
+   * @param {string} path - the route path
+   * @param {Function} args - handler functions 
+   * @memberof Routify
+   */
   this.post = (path, ...args) => {
     routeMaker(this, 'POST', args, path);
     return this
   }
-  /**put HTTP method */
+   /**
+   * @method put
+   * @param {string} path - the route path
+   * @param {Function} args - handler functions 
+   * @memberof Routify
+   */
   this.put = (path, ...args) => {
     routeMaker(this, 'PUT', args, path);
     return this
   }
-  /**patch HTTP method */
+   /**
+   * @method patch
+   * @param {string} path - the route path
+   * @param {Function} args - handler functions 
+   * @memberof Routify
+   */
   this.patch = (path, ...args) => {
     routeMaker(this, 'PATCH', args, path);
     return this
   }
-  /**delete HTTP method */
+   /**
+   * @method delete
+   * @param {string} path - the route path
+   * @param {Function} args - handler functions 
+   * @memberof Routify
+   */
   this.delete = (path, ...args) => {
     routeMaker(this, 'DELETE', args, path);
     return this
   }
-  /**EXPOSE THE URLS */
+   /**
+   * @method expose
+   * @description Exposes the registered routes
+   * @memberof Routify
+   */
   this.expose = () => {
     return this.urls
   }

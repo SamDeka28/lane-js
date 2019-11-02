@@ -1,4 +1,3 @@
-
 /*
 *
 *   An Lightweight framework for Node
@@ -18,7 +17,7 @@ const { rendererOptions, render, redirect, invalidHttp } = require("./render")
 const matchPathName = require("./common/matchPath")
 const { pathify } = require("./pathify")
 const { Routify } = require("./routify")
-const util=require("./common/defaultMiddlewares")
+const util = require("./common/defaultMiddlewares")
 /**
  * @module LaneJs
  * @param {object} serverOption 
@@ -59,9 +58,12 @@ var LaneJs = function (serverOption) {
         var pathname = urlOb.pathname
         let reqMethod = req.method;
         let currRoutesInMethod = urlRoutes[reqMethod];
+        if (!currRoutesInMethod) {
+            return er404(req, res)
+        }
         req.template_directory = serverOption['template_directory'];
         req.template_static = serverOption['template_static'];
-        req.root_dir=serverOption['root_dir'];
+        req.root_dir = serverOption['root_dir'];
         try {
             if (!currRoutesInMethod.hasOwnProperty(pathname)) {
                 let urlKeys = Object.keys(currRoutesInMethod);
@@ -78,7 +80,8 @@ var LaneJs = function (serverOption) {
             let { method, middlewares } = currRoutesInMethod[matchedPath]
             if (req.method == method) {
                 try {
-                    let appMiddlewares = !serverOption.hasOwnProperty('middlewares') ? [util] : serverOption['middlewares'].push(util)
+                    !serverOption.hasOwnProperty('middlewares') ? serverOption["middlewares"] = [util] : serverOption['middlewares'].push(util)
+                    let appMiddlewares = serverOption["middlewares"];
                     middlewares = middlewares ? appMiddlewares.concat(middlewares) : appMiddlewares
                     if (middlewares.length) {
                         await middleware({ middlewares: middlewares }, req, res, (request, response) => {
