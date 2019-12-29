@@ -1,3 +1,4 @@
+
 /*
 *
 *   An Lightweight framework for Node
@@ -19,7 +20,7 @@ const { pathify } = require("./pathify")
 const { Routify } = require("./routify")
 const util = require("./common/defaultMiddlewares")
 /**
- * @module LaneJs
+ * @exports LaneJs
  * @param {object} serverOption 
  * @param {object} serverOption.urls - the urlConfigs
  * @param {object} serverOption.urls.namespace - the namespace if any
@@ -53,14 +54,11 @@ var LaneJs = function (serverOption) {
     let urlRoutes = urlConfig.paths
     let server
 
-    let handler = async (req, res) => {
+    let handler = (req, res) => {
         var urlOb = url.parse(req.url)
         var pathname = urlOb.pathname
         let reqMethod = req.method;
         let currRoutesInMethod = urlRoutes[reqMethod];
-        if (!currRoutesInMethod) {
-            return er404(req, res)
-        }
         req.template_directory = serverOption['template_directory'];
         req.template_static = serverOption['template_static'];
         req.root_dir = serverOption['root_dir'];
@@ -79,19 +77,16 @@ var LaneJs = function (serverOption) {
         if (currRoutesInMethod.hasOwnProperty(matchedPath)) {
             let { method, middlewares } = currRoutesInMethod[matchedPath]
             if (req.method == method) {
-                try {
-                    !serverOption.hasOwnProperty('middlewares') ? serverOption["middlewares"] = [util] : serverOption['middlewares'].push(util)
-                    let appMiddlewares = serverOption["middlewares"];
-                    middlewares = middlewares ? appMiddlewares.concat(middlewares) : appMiddlewares
-                    if (middlewares.length) {
-                        await middleware({ middlewares: middlewares }, req, res, (request, response) => {
-                            req = request
-                            res = response
-                        })
+                    let appMiddlewares = [util];
+                    if (serverOption.hasOwnProperty('middlewares')) {
+                        appMiddlewares.push(...serverOption['middlewares']);
                     }
-                } catch (err) {
-                    console.log(err)
-                }
+                    if (middlewares) {
+                        appMiddlewares.push(...middlewares);
+                    }
+                    if (appMiddlewares.length) {
+                        middleware({ middlewares: appMiddlewares }, req, res);
+                    }
             } else {
                 return invalidHttp(res)
             }
