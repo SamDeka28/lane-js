@@ -5,24 +5,28 @@
  * @param {object} request 
  * @param {object} response 
  */
-function transformRequestResponse({ middlewares },request,response) {
+async function transformRequestResponse({ middlewares }, request, response) {
   let hasNext;
   for (let middleware of middlewares) {
     hasNext = false
-    middleware(request, response, function (err) {
+    middleware = new Promise(resolve => {
+      middleware(request, response, function (err) {
         if (err) {
           if (err instanceof Error) {
-            console.error(err)
-            return
+            console.error(err);
+            return;
           }
-          throw Error(err)
+          throw Error(err);
         } else {
-          hasNext = true
+          hasNext = true;
         }
+        resolve();
       })
+    })
+    await middleware;
 
     if (!hasNext)
       break;
   }
 }
-module.exports = transformRequestResponse
+module.exports = transformRequestResponse;

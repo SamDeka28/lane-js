@@ -54,7 +54,7 @@ var LaneJs = function (serverOption) {
     let urlRoutes = urlConfig.paths
     let server
 
-    let handler = (req, res) => {
+    let handler = async (req, res) => {
         var urlOb = url.parse(req.url)
         var pathname = urlOb.pathname
         let reqMethod = req.method;
@@ -77,16 +77,16 @@ var LaneJs = function (serverOption) {
         if (currRoutesInMethod.hasOwnProperty(matchedPath)) {
             let { method, middlewares } = currRoutesInMethod[matchedPath]
             if (req.method == method) {
-                    let appMiddlewares = [util];
-                    if (serverOption.hasOwnProperty('middlewares')) {
-                        appMiddlewares.push(...serverOption['middlewares']);
-                    }
-                    if (middlewares) {
-                        appMiddlewares.push(...middlewares);
-                    }
-                    if (appMiddlewares.length) {
-                        middleware({ middlewares: appMiddlewares }, req, res);
-                    }
+                let appMiddlewares = [util];
+                if (serverOption.hasOwnProperty('middlewares')) {
+                    appMiddlewares.push(...serverOption['middlewares']);
+                }
+                if (middlewares) {
+                    appMiddlewares.push(...middlewares);
+                }
+                if (appMiddlewares.length) {
+                    await middleware({ middlewares: appMiddlewares }, req, res);
+                }
             } else {
                 return invalidHttp(res)
             }
